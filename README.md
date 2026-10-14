@@ -15,7 +15,7 @@ The full project plan is in [`docs/PROJECT_PLAN.md`](docs/PROJECT_PLAN.md).
 git clone <your-repo-url> drowsy-driver-alert
 cd drowsy-driver-alert
 py -3.11 -m venv venv            # Python 3.11 (MediaPipe 0.10.21 needs <= 3.12)
-venv\Scriptsctivate
+venv\Scripts\activate
 pip install -r requirements.txt
 
 python src/main.py --config config/laptop.yaml
