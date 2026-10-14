@@ -1,0 +1,26 @@
+# Python
+venv/
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Editors / OS
+.vscode/
+.idea/
+Thumbs.db
+.DS_Store
+
+# Run outputs (per-frame CSVs can be large)
+logs/*.csv
+
+# Dataset (download separately, see training/README.md) and personal eye samples
+training/data/
+
+# Recorded webcam clips contain faces: keep them local
+tests/videos/*.mp4
+tests/videos/*.avi
+
+# Keep only the model in use; older versions stay local
+models/eye_state_v*.onnx
+models/eye_state_v*.report.json

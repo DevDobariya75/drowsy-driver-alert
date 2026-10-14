@@ -1,0 +1,5 @@
+# Only needed on the training machine (laptop / Colab), never on the Pi.
+# onnx 1.17 keeps protobuf < 5, which mediapipe 0.10.21 needs.
+torch>=2.2
+onnx==1.17.0
+protobuf>=4.25.3,<5

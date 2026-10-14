@@ -1,0 +1,49 @@
+Device: cpu
+Loading training/data/mrlEyes_2018_01 ...
+  loaded 10000/84898 images (45s)
+  loaded 20000/84898 images (152s)
+  loaded 30000/84898 images (251s)
+  loaded 40000/84898 images (357s)
+  loaded 50000/84898 images (467s)
+  loaded 60000/84898 images (555s)
+  loaded 70000/84898 images (638s)
+  loaded 80000/84898 images (719s)
+Train 73864 (48% closed) | Val 11034 (59% closed), held-out people: 7
+Epoch  1/20  loss 0.6550  train acc 0.598  val acc 0.687  val F1(closed) 0.765  (54s)
+Epoch  2/20  loss 0.4617  train acc 0.797  val acc 0.869  val F1(closed) 0.899  (56s)
+Epoch  3/20  loss 0.3261  train acc 0.891  val acc 0.942  val F1(closed) 0.953  (59s)
+Epoch  4/20  loss 0.2838  train acc 0.916  val acc 0.950  val F1(closed) 0.958  (61s)
+Epoch  5/20  loss 0.2594  train acc 0.931  val acc 0.949  val F1(closed) 0.956  (61s)
+Epoch  6/20  loss 0.2482  train acc 0.936  val acc 0.953  val F1(closed) 0.961  (61s)
+Epoch  7/20  loss 0.2383  train acc 0.942  val acc 0.942  val F1(closed) 0.953  (61s)
+Epoch  8/20  loss 0.2292  train acc 0.946  val acc 0.958  val F1(closed) 0.965  (62s)
+Epoch  9/20  loss 0.2257  train acc 0.949  val acc 0.953  val F1(closed) 0.961  (63s)
+Epoch 10/20  loss 0.2209  train acc 0.950  val acc 0.945  val F1(closed) 0.956  (66s)
+Epoch 11/20  loss 0.2159  train acc 0.954  val acc 0.957  val F1(closed) 0.965  (67s)
+Epoch 12/20  loss 0.2118  train acc 0.956  val acc 0.964  val F1(closed) 0.970  (67s)
+Epoch 13/20  loss 0.2097  train acc 0.956  val acc 0.960  val F1(closed) 0.967  (67s)
+Epoch 14/20  loss 0.2054  train acc 0.959  val acc 0.962  val F1(closed) 0.969  (68s)
+Epoch 15/20  loss 0.2035  train acc 0.959  val acc 0.958  val F1(closed) 0.966  (67s)
+Epoch 16/20  loss 0.2014  train acc 0.960  val acc 0.960  val F1(closed) 0.967  (69s)
+Epoch 17/20  loss 0.1993  train acc 0.962  val acc 0.961  val F1(closed) 0.968  (71s)
+Epoch 18/20  loss 0.1970  train acc 0.963  val acc 0.960  val F1(closed) 0.967  (71s)
+Epoch 19/20  loss 0.1959  train acc 0.964  val acc 0.960  val F1(closed) 0.967  (71s)
+Epoch 20/20  loss 0.1945  train acc 0.964  val acc 0.960  val F1(closed) 0.967  (71s)
+
+=== Validation (held-out people) ===
+validation                       n= 11034  acc 0.964  precision 0.959  recall 0.981  F1 0.970
+validation_dark_x0.3             n= 11034  acc 0.937  precision 0.913  recall 0.988  F1 0.949
+validation_very_dark_x0.12       n= 11034  acc 0.761  precision 0.717  recall 0.987  F1 0.831
+validation_glasses=True          n=  4518  acc 0.945  precision 0.931  recall 0.982  F1 0.956
+validation_glasses=False         n=  6516  acc 0.977  precision 0.981  recall 0.980  F1 0.980
+validation_good_light=True       n=  5167  acc 0.972  precision 0.970  recall 0.983  F1 0.976
+validation_good_light=False      n=  5867  acc 0.957  precision 0.950  recall 0.979  F1 0.964
+
+Confusion matrix (rows = truth):
+            pred open  pred closed
+  open           4221          272
+  closed          126         6415
+  torch.onnx.export(model_cpu, dummy, str(out), dynamo=False, **export_kwargs)
+
+Saved E:\Sem\Sem 7\IOT LAB\IOT_PROJECT\drowsy-driver-alert\models\eye_state.onnx (285 KB). OpenCV vs PyTorch max diff 0.00000, 0.46 ms per frame (2 eyes) on this machine.
+Report: E:\Sem\Sem 7\IOT LAB\IOT_PROJECT\drowsy-driver-alert\models\eye_state.report.json

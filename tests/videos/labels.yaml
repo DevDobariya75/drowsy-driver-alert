@@ -1,0 +1,34 @@
+# One entry per recorded clip in this folder.
+#   expect:  worst level the clip should reach (OK / WARNING / CRITICAL)
+#   reasons: (optional) reasons that must appear
+# Every clip starts with ~5 s of looking straight ahead, eyes open (calibration).
+# Uncomment entries as you record the clips (python tests/record_clip.py <name>).
+
+clips: []
+#  - file: normal.mp4          # 30 s: normal posture, normal blinking
+#    expect: OK
+#  - file: short_closure.mp4   # close eyes ~0.5 s a few times
+#    expect: OK
+#  - file: microsleep.mp4      # close eyes for ~2 s
+#    expect: CRITICAL
+#    reasons: [MICROSLEEP]
+#  - file: head_nod.mp4        # let the head drop forward for ~2 s
+#    expect: CRITICAL
+#    reasons: [HEAD_NOD]
+#  - file: head_tilt.mp4       # tilt the head to one shoulder for ~3 s
+#    expect: CRITICAL
+#    reasons: [HEAD_TILT]
+#  - file: mirror_check.mp4    # quick 1 s glances left and right
+#    expect: OK
+#  - file: look_away.mp4       # look to the side for ~4 s
+#    expect: WARNING
+#    reasons: [DISTRACTION]
+#  - file: yawns.mp4           # 60 s, yawn 3 times (2-3 s each)
+#    expect: WARNING
+#    reasons: [YAWNING]
+#  - file: glasses_microsleep.mp4   # wearing spectacles, close eyes ~2 s
+#    expect: CRITICAL
+#    reasons: [MICROSLEEP]
+#  - file: leave_frame.mp4     # move out of the camera view for ~4 s
+#    expect: WARNING
+#    reasons: [NO_FACE]

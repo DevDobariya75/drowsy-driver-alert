@@ -1,0 +1,297 @@
+{
+  "validation": {
+    "accuracy": 0.9605764002175096,
+    "precision_closed": 0.9484430082256169,
+    "recall_closed": 0.9871579269224889,
+    "f1_closed": 0.9674132893849727,
+    "confusion": {
+      "true_open_pred_open": 4142,
+      "true_open_pred_closed": 351,
+      "true_closed_pred_open": 84,
+      "true_closed_pred_closed": 6457
+    },
+    "n": 11034
+  },
+  "validation_dark_x0.3": {
+    "accuracy": 0.9401848830886351,
+    "precision_closed": 0.9164424302506727,
+    "recall_closed": 0.9892982724354075,
+    "f1_closed": 0.9514777238641376,
+    "confusion": {
+      "true_open_pred_open": 3903,
+      "true_open_pred_closed": 590,
+      "true_closed_pred_open": 70,
+      "true_closed_pred_closed": 6471
+    },
+    "n": 11034
+  },
+  "validation_very_dark_x0.12": {
+    "accuracy": 0.8860793909733551,
+    "precision_closed": 0.8620169909564264,
+    "recall_closed": 0.9617795444121694,
+    "f1_closed": 0.9091697376978104,
+    "confusion": {
+      "true_open_pred_open": 3486,
+      "true_open_pred_closed": 1007,
+      "true_closed_pred_open": 250,
+      "true_closed_pred_closed": 6291
+    },
+    "n": 11034
+  },
+  "validation_very_dark_x0.12_brightened": {
+    "accuracy": 0.8936015950697843,
+    "precision_closed": 0.8768431400084258,
+    "recall_closed": 0.9545940987616572,
+    "f1_closed": 0.9140682184160446,
+    "confusion": {
+      "true_open_pred_open": 3616,
+      "true_open_pred_closed": 877,
+      "true_closed_pred_open": 297,
+      "true_closed_pred_closed": 6244
+    },
+    "n": 11034
+  },
+  "validation_extreme_dark_x0.07": {
+    "accuracy": 0.8309769802428856,
+    "precision_closed": 0.8143318096262436,
+    "recall_closed": 0.9260051979819599,
+    "f1_closed": 0.8665855926747263,
+    "confusion": {
+      "true_open_pred_open": 3112,
+      "true_open_pred_closed": 1381,
+      "true_closed_pred_open": 484,
+      "true_closed_pred_closed": 6057
+    },
+    "n": 11034
+  },
+  "validation_synthetic_lens_glare": {
+    "accuracy": 0.8984049302156969,
+    "precision_closed": 0.8881409338298482,
+    "recall_closed": 0.9480201804005504,
+    "f1_closed": 0.9171041928566146,
+    "confusion": {
+      "true_open_pred_open": 3712,
+      "true_open_pred_closed": 781,
+      "true_closed_pred_open": 340,
+      "true_closed_pred_closed": 6201
+    },
+    "n": 11034
+  },
+  "validation_glasses=True": {
+    "accuracy": 0.934041611332448,
+    "precision_closed": 0.9151453684922245,
+    "recall_closed": 0.9829339143064634,
+    "f1_closed": 0.9478291316526611,
+    "confusion": {
+      "true_open_pred_open": 1513,
+      "true_open_pred_closed": 251,
+      "true_closed_pred_open": 47,
+      "true_closed_pred_closed": 2707
+    },
+    "n": 4518
+  },
+  "validation_glasses=False": {
+    "accuracy": 0.9789748311847759,
+    "precision_closed": 0.974025974025974,
+    "recall_closed": 0.9902297332981251,
+    "f1_closed": 0.98206101872463,
+    "confusion": {
+      "true_open_pred_open": 2629,
+      "true_open_pred_closed": 100,
+      "true_closed_pred_open": 37,
+      "true_closed_pred_closed": 3750
+    },
+    "n": 6516
+  },
+  "validation_good_light=True": {
+    "accuracy": 0.9721308302690149,
+    "precision_closed": 0.962425007893906,
+    "recall_closed": 0.9918646273999349,
+    "f1_closed": 0.9769230769230769,
+    "confusion": {
+      "true_open_pred_open": 1975,
+      "true_open_pred_closed": 119,
+      "true_closed_pred_open": 25,
+      "true_closed_pred_closed": 3048
+    },
+    "n": 5167
+  },
+  "validation_good_light=False": {
+    "accuracy": 0.9504005454235555,
+    "precision_closed": 0.936281241417193,
+    "recall_closed": 0.9829873125720877,
+    "f1_closed": 0.9590659727106484,
+    "confusion": {
+      "true_open_pred_open": 2167,
+      "true_open_pred_closed": 232,
+      "true_closed_pred_open": 59,
+      "true_closed_pred_closed": 3409
+    },
+    "n": 5867
+  },
+  "validation_glasses_reflection=0": {
+    "accuracy": 0.9751900760304122,
+    "precision_closed": 0.9757511860832894,
+    "recall_closed": 0.9914301017675415,
+    "f1_closed": 0.983528161530287,
+    "confusion": {
+      "true_open_pred_open": 586,
+      "true_open_pred_closed": 46,
+      "true_closed_pred_open": 16,
+      "true_closed_pred_closed": 1851
+    },
+    "n": 2499
+  },
+  "validation_glasses_reflection=1": {
+    "accuracy": 0.8995433789954338,
+    "precision_closed": 0.8214285714285714,
+    "recall_closed": 0.9787234042553191,
+    "f1_closed": 0.8932038834951456,
+    "confusion": {
+      "true_open_pred_open": 105,
+      "true_open_pred_closed": 20,
+      "true_closed_pred_open": 2,
+      "true_closed_pred_closed": 92
+    },
+    "n": 219
+  },
+  "validation_glasses_reflection=2": {
+    "accuracy": 0.8811111111111111,
+    "precision_closed": 0.8050579557428873,
+    "recall_closed": 0.9634300126103404,
+    "f1_closed": 0.8771526980482205,
+    "confusion": {
+      "true_open_pred_open": 822,
+      "true_open_pred_closed": 185,
+      "true_closed_pred_open": 29,
+      "true_closed_pred_closed": 764
+    },
+    "n": 1800
+  },
+  "onnx": {
+    "path": "models\\eye_state_v3.onnx",
+    "size_kb": 285.50390625,
+    "opencv_vs_torch_max_diff": 8.612871170043945e-06,
+    "opencv_ms_per_frame_2_eyes": 0.4867689999991853
+  },
+  "compare": {
+    "model": "models/eye_state_v2.onnx",
+    "validation": {
+      "accuracy": 0.9588544498821824,
+      "precision_closed": 0.952161640172337,
+      "recall_closed": 0.9798195994496255,
+      "f1_closed": 0.965792646172393,
+      "confusion": {
+        "true_open_pred_open": 4171,
+        "true_open_pred_closed": 322,
+        "true_closed_pred_open": 132,
+        "true_closed_pred_closed": 6409
+      },
+      "n": 11034
+    },
+    "validation_dark_x0.3": {
+      "accuracy": 0.9423599782490484,
+      "precision_closed": 0.9307075127644056,
+      "recall_closed": 0.9753860266014371,
+      "f1_closed": 0.9525231412361899,
+      "confusion": {
+        "true_open_pred_open": 4018,
+        "true_open_pred_closed": 475,
+        "true_closed_pred_open": 161,
+        "true_closed_pred_closed": 6380
+      },
+      "n": 11034
+    },
+    "validation_very_dark_x0.12": {
+      "accuracy": 0.8903389523291644,
+      "precision_closed": 0.8722245496439045,
+      "recall_closed": 0.9548998624063599,
+      "f1_closed": 0.9116917238359363,
+      "confusion": {
+        "true_open_pred_open": 3578,
+        "true_open_pred_closed": 915,
+        "true_closed_pred_open": 295,
+        "true_closed_pred_closed": 6246
+      },
+      "n": 11034
+    },
+    "validation_extreme_dark_x0.07": {
+      "accuracy": 0.8230922602863875,
+      "precision_closed": 0.7987241244629606,
+      "recall_closed": 0.9379299801253631,
+      "f1_closed": 0.8627478554352412,
+      "confusion": {
+        "true_open_pred_open": 2947,
+        "true_open_pred_closed": 1546,
+        "true_closed_pred_open": 406,
+        "true_closed_pred_closed": 6135
+      },
+      "n": 11034
+    },
+    "validation_synthetic_lens_glare": {
+      "accuracy": 0.7914627514953779,
+      "precision_closed": 0.830423940149626,
+      "recall_closed": 0.8145543494878459,
+      "f1_closed": 0.8224125955082195,
+      "confusion": {
+        "true_open_pred_open": 3405,
+        "true_open_pred_closed": 1088,
+        "true_closed_pred_open": 1213,
+        "true_closed_pred_closed": 5328
+      },
+      "n": 11034
+    },
+    "validation_glasses_reflection=0": {
+      "accuracy": 0.976390556222489,
+      "precision_closed": 0.9803400637619554,
+      "recall_closed": 0.9882163899303695,
+      "f1_closed": 0.9842624699919978,
+      "confusion": {
+        "true_open_pred_open": 595,
+        "true_open_pred_closed": 37,
+        "true_closed_pred_open": 22,
+        "true_closed_pred_closed": 1845
+      },
+      "n": 2499
+    },
+    "validation_glasses_reflection=1": {
+      "accuracy": 0.8812785388127854,
+      "precision_closed": 0.7931034482758621,
+      "recall_closed": 0.9787234042553191,
+      "f1_closed": 0.8761904761904762,
+      "confusion": {
+        "true_open_pred_open": 101,
+        "true_open_pred_closed": 24,
+        "true_closed_pred_open": 2,
+        "true_closed_pred_closed": 92
+      },
+      "n": 219
+    },
+    "validation_glasses_reflection=2": {
+      "accuracy": 0.8766666666666667,
+      "precision_closed": 0.7983281086729362,
+      "recall_closed": 0.9634300126103404,
+      "f1_closed": 0.8731428571428571,
+      "confusion": {
+        "true_open_pred_open": 814,
+        "true_open_pred_closed": 193,
+        "true_closed_pred_open": 29,
+        "true_closed_pred_closed": 764
+      },
+      "n": 1800
+    },
+    "validation_glasses=True": {
+      "accuracy": 0.932049579459938,
+      "precision_closed": 0.9140439932318105,
+      "recall_closed": 0.9807552650689906,
+      "f1_closed": 0.9462252583639867,
+      "confusion": {
+        "true_open_pred_open": 1510,
+        "true_open_pred_closed": 254,
+        "true_closed_pred_open": 53,
+        "true_closed_pred_closed": 2701
+      },
+      "n": 4518
+    }
+  }
+}

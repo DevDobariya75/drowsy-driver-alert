@@ -1,0 +1,12 @@
+# Runtime (laptop and Raspberry Pi, Python 3.11)
+mediapipe==0.10.21
+opencv-python==4.11.0.86
+numpy==1.26.4
+PyYAML==6.0.3
+psutil==7.2.2
+
+# Tests
+pytest==9.1.1
+
+# Pi only (install with apt, not pip):  python3-picamera2  python3-gpiozero
+# Eye-model training only:              training/requirements-train.txt

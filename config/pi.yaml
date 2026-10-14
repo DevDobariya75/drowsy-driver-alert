@@ -1,0 +1,6 @@
+extends: base.yaml
+
+camera: picamera2
+alarm: gpio_buzzer
+buzzer_pin: 18
+show_window: false

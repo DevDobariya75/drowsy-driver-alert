@@ -1,0 +1,52 @@
+Device: cpu
+Loading training/data/mrlEyes_2018_01 ...
+  loaded 10000/84898 images (2s)
+  loaded 20000/84898 images (5s)
+  loaded 30000/84898 images (7s)
+  loaded 40000/84898 images (9s)
+  loaded 50000/84898 images (12s)
+  loaded 60000/84898 images (15s)
+  loaded 70000/84898 images (17s)
+  loaded 80000/84898 images (19s)
+Train 73864 (48% closed) | Val 11034 (59% closed), held-out people: 7
+Epoch  1/20  loss 0.5905  train acc 0.680  val acc 0.853  val F1(closed) 0.874  (62s)
+Epoch  2/20  loss 0.3719  train acc 0.862  val acc 0.779  val F1(closed) 0.843  (66s)
+Epoch  3/20  loss 0.3075  train acc 0.901  val acc 0.931  val F1(closed) 0.942  (70s)
+Epoch  4/20  loss 0.2824  train acc 0.914  val acc 0.908  val F1(closed) 0.919  (70s)
+Epoch  5/20  loss 0.2662  train acc 0.925  val acc 0.922  val F1(closed) 0.938  (69s)
+Epoch  6/20  loss 0.2579  train acc 0.929  val acc 0.935  val F1(closed) 0.948  (71s)
+Epoch  7/20  loss 0.2473  train acc 0.935  val acc 0.944  val F1(closed) 0.955  (71s)
+Epoch  8/20  loss 0.2431  train acc 0.937  val acc 0.937  val F1(closed) 0.949  (70s)
+Epoch  9/20  loss 0.2384  train acc 0.940  val acc 0.949  val F1(closed) 0.959  (70s)
+Epoch 10/20  loss 0.2335  train acc 0.943  val acc 0.948  val F1(closed) 0.956  (71s)
+Epoch 11/20  loss 0.2295  train acc 0.945  val acc 0.959  val F1(closed) 0.966  (72s)
+Epoch 12/20  loss 0.2265  train acc 0.947  val acc 0.956  val F1(closed) 0.964  (70s)
+Epoch 13/20  loss 0.2243  train acc 0.948  val acc 0.956  val F1(closed) 0.964  (67s)
+Epoch 14/20  loss 0.2209  train acc 0.950  val acc 0.957  val F1(closed) 0.964  (70s)
+Epoch 15/20  loss 0.2189  train acc 0.951  val acc 0.956  val F1(closed) 0.964  (68s)
+Epoch 16/20  loss 0.2166  train acc 0.952  val acc 0.954  val F1(closed) 0.962  (70s)
+Epoch 17/20  loss 0.2130  train acc 0.955  val acc 0.957  val F1(closed) 0.965  (67s)
+Epoch 18/20  loss 0.2115  train acc 0.954  val acc 0.957  val F1(closed) 0.964  (69s)
+Epoch 19/20  loss 0.2108  train acc 0.955  val acc 0.958  val F1(closed) 0.965  (67s)
+Epoch 20/20  loss 0.2099  train acc 0.955  val acc 0.957  val F1(closed) 0.965  (66s)
+
+=== Validation (held-out people) ===
+validation                       n= 11034  acc 0.959  precision 0.952  recall 0.980  F1 0.966
+validation_dark_x0.3             n= 11034  acc 0.942  precision 0.931  recall 0.975  F1 0.953
+validation_very_dark_x0.12       n= 11034  acc 0.890  precision 0.872  recall 0.955  F1 0.912
+validation_very_dark_x0.12_brightened n= 11034  acc 0.901  precision 0.899  recall 0.938  F1 0.918
+validation_extreme_dark_x0.07    n= 11034  acc 0.831  precision 0.807  recall 0.940  F1 0.868
+validation_glasses=True          n=  4518  acc 0.932  precision 0.914  recall 0.981  F1 0.946
+validation_glasses=False         n=  6516  acc 0.977  precision 0.982  recall 0.979  F1 0.981
+validation_good_light=True       n=  5167  acc 0.969  precision 0.974  recall 0.973  F1 0.974
+validation_good_light=False      n=  5867  acc 0.950  precision 0.934  recall 0.986  F1 0.959
+
+Confusion matrix (rows = truth):
+            pred open  pred closed
+  open           4171          322
+  closed          132         6409
+E:\Sem\Sem 7\IOT LAB\IOT_PROJECT\drowsy-driver-alert\training\train_eye_model.py:281: DeprecationWarning: You are using the legacy TorchScript-based ONNX export. Starting in PyTorch 2.9, the new torch.export-based ONNX exporter has become the default. Learn more about the new export logic: https://docs.pytorch.org/docs/stable/onnx_export.html. For exporting control flow: https://pytorch.org/tutorials/beginner/onnx/export_control_flow_model_to_onnx_tutorial.html
+  torch.onnx.export(model_cpu, dummy, str(out), dynamo=False, **export_kwargs)
+
+Saved E:\Sem\Sem 7\IOT LAB\IOT_PROJECT\drowsy-driver-alert\models\eye_state.onnx (286 KB). OpenCV vs PyTorch max diff 0.00001, 0.49 ms per frame (2 eyes) on this machine.
+Report: E:\Sem\Sem 7\IOT LAB\IOT_PROJECT\drowsy-driver-alert\models\eye_state.report.json

@@ -1,0 +1,67 @@
+Device: cpu
+Loading training/data/mrlEyes_2018_01 ...
+  loaded 10000/84898 images (89s)
+  loaded 20000/84898 images (228s)
+  loaded 30000/84898 images (368s)
+  loaded 40000/84898 images (511s)
+  loaded 50000/84898 images (642s)
+  loaded 60000/84898 images (780s)
+  loaded 70000/84898 images (911s)
+  loaded 80000/84898 images (1041s)
+Train 73864 (48% closed) | Val 11034 (59% closed), held-out people: 7
+Epoch  1/20  loss 0.6334  train acc 0.627  val acc 0.809  val+glare acc 0.660  F1 0.851/0.735  (532s)
+Epoch  2/20  loss 0.4560  train acc 0.790  val acc 0.917  val+glare acc 0.740  F1 0.932/0.765  (223s)
+Epoch  3/20  loss 0.3971  train acc 0.830  val acc 0.925  val+glare acc 0.755  F1 0.937/0.768  (60s)
+Epoch  4/20  loss 0.3662  train acc 0.852  val acc 0.768  val+glare acc 0.682  F1 0.836/0.788  (64s)
+Epoch  5/20  loss 0.3513  train acc 0.862  val acc 0.912  val+glare acc 0.772  F1 0.931/0.838  (68s)
+Epoch  6/20  loss 0.3411  train acc 0.869  val acc 0.942  val+glare acc 0.837  F1 0.953/0.874  (70s)
+Epoch  7/20  loss 0.3280  train acc 0.878  val acc 0.957  val+glare acc 0.838  F1 0.964/0.855  (73s)
+Epoch  8/20  loss 0.3216  train acc 0.882  val acc 0.929  val+glare acc 0.842  F1 0.944/0.880  (72s)
+Epoch  9/20  loss 0.3140  train acc 0.888  val acc 0.942  val+glare acc 0.847  F1 0.953/0.883  (73s)
+Epoch 10/20  loss 0.3081  train acc 0.892  val acc 0.957  val+glare acc 0.874  F1 0.965/0.895  (79s)
+Epoch 11/20  loss 0.3031  train acc 0.895  val acc 0.959  val+glare acc 0.871  F1 0.966/0.886  (80s)
+Epoch 12/20  loss 0.3020  train acc 0.895  val acc 0.962  val+glare acc 0.878  F1 0.968/0.896  (86s)
+Epoch 13/20  loss 0.2952  train acc 0.901  val acc 0.957  val+glare acc 0.878  F1 0.964/0.904  (98s)
+Epoch 14/20  loss 0.2902  train acc 0.903  val acc 0.961  val+glare acc 0.888  F1 0.967/0.909  (96s)
+Epoch 15/20  loss 0.2893  train acc 0.904  val acc 0.955  val+glare acc 0.887  F1 0.963/0.910  (98s)
+Epoch 16/20  loss 0.2836  train acc 0.909  val acc 0.965  val+glare acc 0.895  F1 0.970/0.912  (76s)
+Epoch 17/20  loss 0.2822  train acc 0.909  val acc 0.961  val+glare acc 0.897  F1 0.968/0.916  (79s)
+Epoch 18/20  loss 0.2799  train acc 0.911  val acc 0.957  val+glare acc 0.896  F1 0.964/0.916  (142s)
+Epoch 19/20  loss 0.2769  train acc 0.912  val acc 0.959  val+glare acc 0.899  F1 0.967/0.917  (237s)
+Epoch 20/20  loss 0.2771  train acc 0.911  val acc 0.961  val+glare acc 0.898  F1 0.967/0.917  (141s)
+
+=== Validation (held-out people) ===
+validation                       n= 11034  acc 0.961  precision 0.948  recall 0.987  F1 0.967
+validation_dark_x0.3             n= 11034  acc 0.940  precision 0.916  recall 0.989  F1 0.951
+validation_very_dark_x0.12       n= 11034  acc 0.886  precision 0.862  recall 0.962  F1 0.909
+validation_very_dark_x0.12_brightened n= 11034  acc 0.894  precision 0.877  recall 0.955  F1 0.914
+validation_extreme_dark_x0.07    n= 11034  acc 0.831  precision 0.814  recall 0.926  F1 0.867
+validation_synthetic_lens_glare  n= 11034  acc 0.898  precision 0.888  recall 0.948  F1 0.917
+validation_glasses=True          n=  4518  acc 0.934  precision 0.915  recall 0.983  F1 0.948
+validation_glasses=False         n=  6516  acc 0.979  precision 0.974  recall 0.990  F1 0.982
+validation_good_light=True       n=  5167  acc 0.972  precision 0.962  recall 0.992  F1 0.977
+validation_good_light=False      n=  5867  acc 0.950  precision 0.936  recall 0.983  F1 0.959
+validation_glasses_reflection=0  n=  2499  acc 0.975  precision 0.976  recall 0.991  F1 0.984
+validation_glasses_reflection=1  n=   219  acc 0.900  precision 0.821  recall 0.979  F1 0.893
+validation_glasses_reflection=2  n=  1800  acc 0.881  precision 0.805  recall 0.963  F1 0.877
+
+Confusion matrix (rows = truth):
+            pred open  pred closed
+  open           4142          351
+  closed           84         6457
+E:\Sem\Sem 7\IOT LAB\IOT_PROJECT\drowsy-driver-alert\training\train_eye_model.py:338: DeprecationWarning: You are using the legacy TorchScript-based ONNX export. Starting in PyTorch 2.9, the new torch.export-based ONNX exporter has become the default. Learn more about the new export logic: https://docs.pytorch.org/docs/stable/onnx_export.html. For exporting control flow: https://pytorch.org/tutorials/beginner/onnx/export_control_flow_model_to_onnx_tutorial.html
+  torch.onnx.export(model_cpu, dummy, str(out), dynamo=False, **export_kwargs)
+
+Saved models\eye_state_v3.onnx (286 KB). OpenCV vs PyTorch max diff 0.00001, 0.49 ms per frame (2 eyes) on this machine.
+
+=== New vs eye_state_v2.onnx (same held-out people, same images) ===
+validation                               old acc 0.959   new acc 0.961
+validation_dark_x0.3                     old acc 0.942   new acc 0.940
+validation_very_dark_x0.12               old acc 0.890   new acc 0.886
+validation_extreme_dark_x0.07            old acc 0.823   new acc 0.831
+validation_synthetic_lens_glare          old acc 0.791   new acc 0.898
+validation_glasses_reflection=0          old acc 0.976   new acc 0.975
+validation_glasses_reflection=1          old acc 0.881   new acc 0.900
+validation_glasses_reflection=2          old acc 0.877   new acc 0.881
+validation_glasses=True                  old acc 0.932   new acc 0.934
+Report: models\eye_state_v3.report.json

@@ -1,0 +1,10 @@
+# Used by tests/run_video_tests.py: recorded clips, no sound, no window.
+extends: base.yaml
+
+camera: video
+alarm: console
+show_window: false
+log_level: WARNING
+
+calibration:
+  seconds: 3

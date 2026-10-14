@@ -1,0 +1,113 @@
+# Shared settings. laptop.yaml and pi.yaml extend this file, so detection
+# thresholds are identical on every platform.
+
+resolution: [640, 480]
+max_fps: 0                  # 0 = unlimited; set 15 to simulate a Raspberry Pi
+show_window: false
+mirror_display: true        # selfie view on screen (detection always uses the original image)
+log_level: INFO
+csv_log: null               # path to write per-frame metrics (for report graphs)
+
+camera: webcam              # webcam | picamera2 | video
+camera_index: 0
+video_path: null
+video_realtime: false       # video: play at real speed instead of as fast as possible
+
+alarm: console              # console | speaker | gpio_buzzer
+buzzer_pin: 18
+buzzer_active_high: true
+
+landmarks:
+  min_detection_confidence: 0.5
+  min_tracking_confidence: 0.5
+
+preprocess:
+  enabled: true
+  dark_below: 60            # mean brightness (0-255)
+  bright_above: 180
+  hysteresis: 8             # avoids flickering between modes
+  gamma_dark: 0.5           # < 1 brightens
+  gamma_bright: 1.5         # > 1 darkens
+  clahe_clip: 2.0
+  clahe_clip_dark: 1.0     # gentler in the dark: CLAHE also amplifies noise
+  clahe_grid: 8
+  dark_blur: 5              # denoise kernel applied BEFORE brightening (0 = off)
+  brightness_ema_alpha: 0.1
+  very_dark_below: 25       # below this with no face -> LOW_VISIBILITY
+
+smoothing:
+  alpha: 0.4                # EMA for MAR and head angles (NOT for EAR: it would stretch blinks)
+
+# How "closed" each eye is: ratio = EAR / that eye's calibrated open EAR.
+#   ratio >= open_ref -> score 0 (open)     ratio <= closed_ref -> score 1 (closed)
+# The LESS closed eye counts, so both eyes must close.
+eyes:
+  open_ref: 0.85
+  closed_ref: 0.35
+  close_score: 0.6          # score >= this -> closed (about ratio <= 0.55)
+  open_score: 0.4           # score <= this -> open again (hysteresis: no flicker)
+  look_down_start: 5        # deg below baseline where look-down compensation starts
+  look_down_full: 20        # deg where it is at full strength
+  look_down_extra: 0.15     # added to both levels when looking fully down
+  model_weight: 0.4         # eye model share of the score: the model alone can never close an eye,
+                            # and fully closed lids (EAR) always count even if the model disagrees
+  median_frames: 3          # removes single-frame glitches
+
+# Lens reflections: fraction of near-white pixels around an eye above which that
+# eye is treated as covered by glare. If only ONE eye has glare, the clear eye decides.
+glare_threshold: 0.06
+
+calibration:
+  seconds: 10
+  min_samples: 30
+  model_max_open_p: 0.35    # model says P(closed) > this for OPEN eyes -> don't trust it for this driver
+  recalibrate_brightness_delta: 60  # brightness change that triggers recalibration
+  recalibrate_after_seconds: 30
+
+thresholds:
+  # --- CRITICAL (continuous alarm)
+  microsleep: 1.0           # s both eyes closed
+  nod_pitch_delta: 20       # deg below baseline ...
+  nod_eye_score: 0.5        # ... with eyelids down (eye score >= this) ...
+  nod_duration: 1.0         # ... for this long
+  hang_pitch_delta: 35      # head hanging this far down ...
+  hang_duration: 2.0        # ... for this long, whatever the eyes
+  tilt_roll_delta: 30       # deg towards a shoulder
+  tilt_duration: 2.0
+  perclos_critical: 0.40
+  critical_clear_after: 2.0 # eyes open & head normal this long -> leave CRITICAL
+
+  # --- WARNING (short beeps)
+  perclos_warning: 0.25
+  yawns_warning: 3          # within yawn_window
+  fatigue_signs_for_warning: 2   # weak signs needed AT THE SAME TIME to beep
+  fatigue_confirm: 2.0      # s the signs must hold together
+  distraction_yaw_delta: 30 # deg
+  distraction_duration: 2.0
+  looking_down_duration: 4.0 # s with head >= nod_pitch_delta down (eyes open)
+  no_face_warning: 2.0      # s
+  warning_pulse: 5.0        # s a one-off warning (yawns, fatigue) stays active
+  warning_cooldown: 60.0    # s before the same one-off warning can fire again
+
+  # --- NOTES (on screen only, no beep): weak signs on their own
+  perclos_notice: 0.12
+  long_blinks_notice: 3     # long blinks within 60 s
+  blink_rate_high: 30       # blinks / min
+  yawns_notice: 2
+
+  # --- measurement details
+  blink_min: 0.10           # s; shorter closures are noise
+  blink_max: 0.50           # s; longer = long/slow blink
+  perclos_window: 60        # s
+  perclos_min_coverage: 0.8 # need 80% of the window measured before using PERCLOS
+  perclos_score: 0.8        # PERCLOS counts eyes ~80% closed (standard P80), not half-open
+  mar_yawn: 0.6
+  yawn_min_duration: 1.5    # s
+  yawn_window: 300          # s
+  eye_gate_yaw: 25          # deg: head turned this far -> eyes not judged
+  stats_gate_pitch_down: 15 # deg: looking this far down -> blink / PERCLOS stats paused
+  stats_gate_pitch_up: 20   # deg: looking this far up   -> stats paused
+
+eye_model:
+  enabled: true             # trained on MRL Eye Dataset (see training/README.md)
+  path: models/eye_state.onnx
