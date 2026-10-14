@@ -341,9 +341,9 @@ def test_face_lost_while_head_drops_is_critical(sm):
     d.run(3)
     d.run(0.5, pitch=10)
     d.run(0.3, pitch=18)            # head dropping ...
-    s = d.run(1.2, face=False)      # ... and the face vanishes (camera sees top of head)
+    s = d.run(0.2, face=False)      # ... and the face vanishes (camera sees top of head)
     assert s.level != Level.CRITICAL
-    s = d.run(0.5, face=False)
+    s = d.run(0.2, face=False)      # alarm within 0.4 s of losing the face
     assert s.level == Level.CRITICAL and "HEAD_DOWN" in s.reasons
 
 
@@ -358,9 +358,9 @@ def test_face_lost_with_head_up_is_only_a_warning(sm):
 def test_head_down_with_eyes_not_visible_to_model(sm):
     d = Driver(sm)
     d.run(3)
-    s = d.run(1.0, pitch=18, p=0.9)  # landmarks guess open eyes, model sees no eye
+    s = d.run(0.4, pitch=18, p=0.9)  # landmarks guess open eyes, model sees no eye
     assert s.level != Level.CRITICAL
-    s = d.run(0.7, pitch=18, p=0.9)
+    s = d.run(0.2, pitch=18, p=0.9)  # alarm within 0.6 s
     assert s.level == Level.CRITICAL and "HEAD_DOWN" in s.reasons
 
 
@@ -381,3 +381,19 @@ def test_head_down_alarm_stays_until_driver_is_back(sm):
     assert s.level == Level.CRITICAL
     s = d.run(2.5)
     assert s.level == Level.OK
+
+
+def test_head_down_with_lids_down_is_fast(sm):
+    d = Driver(sm)
+    d.run(3)
+    s = d.run(0.7, pitch=18, ear=CLOSED)   # 0.5 s + 3-frame median
+    assert s.level == Level.CRITICAL and "HEAD_DOWN" in s.reasons
+
+
+def test_blink_while_looking_down_is_not_head_down(sm):
+    d = Driver(sm)
+    d.run(3)
+    for _ in range(5):
+        d.run(1.0, pitch=25, ear=LOOK_DOWN_EAR)
+        d.run(0.25, pitch=25, ear=CLOSED)   # normal blink while reading the dashboard
+    assert Level.CRITICAL not in d.levels

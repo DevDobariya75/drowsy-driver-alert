@@ -5,9 +5,9 @@ CRITICAL (continuous alarm): strong, direct evidence of sleep
   * HEAD_NOD      head dropped >= 20 deg for 1 s with the eyelids down,
                   or head hanging >= 35 deg for 2 s
   * HEAD_TILT     head on a shoulder >= 30 deg for 2 s
-  * HEAD_DOWN     head down and the eyes cannot be seen for 1.5 s: either the face
-                  vanished while the head was dropping (camera sees the top of the
-                  head), or the face is tracked but neither eye is visibly open
+  * HEAD_DOWN     head down and the eyes cannot be seen: the face vanished (0.3 s)
+                  while the head was dropping (camera sees the top of the head), or
+                  the face is tracked but neither eye is visibly open (0.5 s)
   * PERCLOS_HIGH  eyes closed >= 40% of the last minute
   Stays latched until the driver is clearly awake again for critical_clear_after s.
 
@@ -125,7 +125,7 @@ class DriverStateMachine:
                 timer.update(False, t)
             if self.lost_while_down is None:   # was the head going down just before?
                 self.lost_while_down = any(dp >= th["head_down_lost_pitch"] for _, dp in self.recent_pitch)
-            if self.lost_down.update(self.lost_while_down, t) >= th["head_down_duration"]:
+            if self.lost_down.update(self.lost_while_down, t) >= th["head_down_lost_duration"]:
                 critical.append("HEAD_DOWN")
             if self.no_face.update(True, t) >= th["no_face_warning"]:
                 warning.append("LOW_VISIBILITY" if o.very_dark else "NO_FACE")
