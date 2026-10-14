@@ -47,6 +47,7 @@ camera ─▶ light normalization ─▶ MediaPipe Face Mesh ─▶ EAR, MAR, he
 | MICROSLEEP | both eyes closed ≥ 1.0 s |
 | HEAD_NOD | head ≥ 20° down for 1 s **with eyelids down**, or head hanging ≥ 35° for 2 s |
 | HEAD_TILT | head ≥ 30° towards a shoulder for 2 s |
+| HEAD_DOWN | head down and **eyes not visible** for 1.5 s: the face disappears while the head is dropping (camera sees the top of the head), or the head is ≥ 15° down and no open eye can be seen |
 | PERCLOS_HIGH | eyes closed ≥ 40% of the last minute |
 
 **WARNING: short beeps**

@@ -72,6 +72,11 @@ thresholds:
   nod_duration: 1.0         # ... for this long
   hang_pitch_delta: 35      # head hanging this far down ...
   hang_duration: 2.0        # ... for this long, whatever the eyes
+  hidden_pitch_delta: 15    # head this far down ...
+  hidden_model_p: 0.7       # ... and the eye model sees no open eye (both P(closed) >= this) or lids down ...
+  head_down_duration: 1.5   # ... for this long -> HEAD_DOWN. Also used when the face vanishes:
+  head_down_lost_pitch: 12  # face lost within head_down_memory s after the head was this far down
+  head_down_memory: 1.5     # s
   tilt_roll_delta: 30       # deg towards a shoulder
   tilt_duration: 2.0
   perclos_critical: 0.40

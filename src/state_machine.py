@@ -5,6 +5,9 @@ CRITICAL (continuous alarm): strong, direct evidence of sleep
   * HEAD_NOD      head dropped >= 20 deg for 1 s with the eyelids down,
                   or head hanging >= 35 deg for 2 s
   * HEAD_TILT     head on a shoulder >= 30 deg for 2 s
+  * HEAD_DOWN     head down and the eyes cannot be seen for 1.5 s: either the face
+                  vanished while the head was dropping (camera sees the top of the
+                  head), or the face is tracked but neither eye is visibly open
   * PERCLOS_HIGH  eyes closed >= 40% of the last minute
   Stays latched until the driver is clearly awake again for critical_clear_after s.
 
@@ -23,6 +26,7 @@ False-alarm guards
   * eye closure is ignored while yawning or looking far to the side
   * blink / PERCLOS statistics pause while looking clearly down or up
   * both eyes must be closed (see EyeClosureDetector)"""
+from collections import deque
 from dataclasses import dataclass, field
 
 from .metrics import BlinkDetector, EyeClosureDetector, Perclos, YawnDetector
@@ -74,6 +78,10 @@ class DriverStateMachine:
         self.no_face = ConditionTimer()
         self.awake = ConditionTimer()
         self.fatigue = ConditionTimer()
+        self.hidden = ConditionTimer()      # head down, eyes not visible (face tracked)
+        self.lost_down = ConditionTimer()   # face lost while the head was dropping
+        self.recent_pitch = deque()         # (t, d_pitch) of the last seconds with a face
+        self.lost_while_down = None         # decided once, when the face disappears
 
         self.critical_latched = False
         self.critical_reasons = []
@@ -87,8 +95,10 @@ class DriverStateMachine:
         self.base_pitch, self.base_yaw, self.base_roll = baseline.pitch, baseline.yaw, baseline.roll
         # Timers measured against the old baseline are meaningless now.
         for timer in (self.closed_timer, self.nod, self.hang, self.tilt, self.away, self.down,
-                      self.awake, self.fatigue):
+                      self.awake, self.fatigue, self.hidden, self.lost_down):
             timer.since = None
+        self.recent_pitch.clear()
+        self.lost_while_down = None
         self.blinks.reset_closure()
         self.critical_latched = False
         self.critical_reasons = []
@@ -111,14 +121,23 @@ class DriverStateMachine:
             self._pause_eye_stats()
             self.eyes.reset()
             for timer in (self.closed_timer, self.nod, self.hang, self.tilt, self.away,
-                          self.down, self.awake, self.fatigue):
+                          self.down, self.awake, self.fatigue, self.hidden):
                 timer.update(False, t)
+            if self.lost_while_down is None:   # was the head going down just before?
+                self.lost_while_down = any(dp >= th["head_down_lost_pitch"] for _, dp in self.recent_pitch)
+            if self.lost_down.update(self.lost_while_down, t) >= th["head_down_duration"]:
+                critical.append("HEAD_DOWN")
             if self.no_face.update(True, t) >= th["no_face_warning"]:
                 warning.append("LOW_VISIBILITY" if o.very_dark else "NO_FACE")
             keep_latched = True  # driver slumped out of view during an alarm: keep alarming
         else:
             self.no_face.update(False, t)
+            self.lost_down.update(False, t)
+            self.lost_while_down = None
             d_pitch = o.pitch - self.base_pitch
+            self.recent_pitch.append((t, d_pitch))
+            while t - self.recent_pitch[0][0] > th["head_down_memory"]:
+                self.recent_pitch.popleft()
             d_yaw = o.yaw - self.base_yaw
             d_roll = o.roll - self.base_roll
 
@@ -149,6 +168,14 @@ class DriverStateMachine:
                 critical.append("HEAD_NOD")
             if self.hang.update(d_pitch >= th["hang_pitch_delta"], t) >= th["hang_duration"]:
                 critical.append("HEAD_NOD")
+            # Eyes not visible with the head down: lids look shut, or the eye model
+            # sees no open eye on either side (brow / lid / hair instead of an eye).
+            no_open_eye = (p_l is not None and p_r is not None
+                           and min(p_l, p_r) >= th["hidden_model_p"])
+            eyes_hidden = self.eyes.score >= th["nod_eye_score"] or no_open_eye
+            if self.hidden.update(d_pitch >= th["hidden_pitch_delta"] and eyes_hidden and not yawning,
+                                  t) >= th["head_down_duration"]:
+                critical.append("HEAD_DOWN")
             if self.tilt.update(abs(d_roll) >= th["tilt_roll_delta"], t) >= th["tilt_duration"]:
                 critical.append("HEAD_TILT")
             if self.away.update(abs(d_yaw) >= th["distraction_yaw_delta"], t) >= th["distraction_duration"]:

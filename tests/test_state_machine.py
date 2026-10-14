@@ -333,3 +333,51 @@ def test_reflection_on_one_lens_does_not_fake_closure(sm):
     d = Driver(sm)
     d.run(3, ear=CLOSED, ear_right=OPEN, glare=(True, False))
     assert max(d.levels) == Level.OK
+
+
+# ------------------------------------------------------------------ head down, eyes not visible
+def test_face_lost_while_head_drops_is_critical(sm):
+    d = Driver(sm)
+    d.run(3)
+    d.run(0.5, pitch=10)
+    d.run(0.3, pitch=18)            # head dropping ...
+    s = d.run(1.2, face=False)      # ... and the face vanishes (camera sees top of head)
+    assert s.level != Level.CRITICAL
+    s = d.run(0.5, face=False)
+    assert s.level == Level.CRITICAL and "HEAD_DOWN" in s.reasons
+
+
+def test_face_lost_with_head_up_is_only_a_warning(sm):
+    d = Driver(sm)
+    d.run(3)
+    s = d.run(4, face=False)        # e.g. hand in front of the camera
+    assert s.level == Level.WARNING and "NO_FACE" in s.reasons
+    assert Level.CRITICAL not in d.levels
+
+
+def test_head_down_with_eyes_not_visible_to_model(sm):
+    d = Driver(sm)
+    d.run(3)
+    s = d.run(1.0, pitch=18, p=0.9)  # landmarks guess open eyes, model sees no eye
+    assert s.level != Level.CRITICAL
+    s = d.run(0.7, pitch=18, p=0.9)
+    assert s.level == Level.CRITICAL and "HEAD_DOWN" in s.reasons
+
+
+def test_head_down_reading_phone_with_visible_eyes_is_not_critical(sm):
+    d = Driver(sm)
+    d.run(3)
+    d.run(6, pitch=25, ear=LOOK_DOWN_EAR, p=0.3)
+    assert Level.CRITICAL not in d.levels
+    assert "LOOKING_DOWN" in d.reasons
+
+
+def test_head_down_alarm_stays_until_driver_is_back(sm):
+    d = Driver(sm)
+    d.run(3)
+    d.run(0.5, pitch=20)
+    d.run(3, face=False)
+    s = d.run(1.0)                   # back up, but not yet for critical_clear_after
+    assert s.level == Level.CRITICAL
+    s = d.run(2.5)
+    assert s.level == Level.OK
