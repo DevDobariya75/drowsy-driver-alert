@@ -71,15 +71,18 @@ thresholds:
   nod_eye_score: 0.5        # ... with eyelids down (eye score >= this) ...
   nod_duration: 1.0         # ... for this long
   hang_pitch_delta: 35      # head hanging this far down ...
-  hang_duration: 2.0        # ... for this long, whatever the eyes
+  hang_duration: 1.0        # ... for this long, whatever the eyes
   hidden_pitch_delta: 15    # head this far down ...
   hidden_model_p: 0.7       # ... and the eye model sees no open eye (both P(closed) >= this) or lids down ...
   head_down_duration: 0.5   # ... for this long -> HEAD_DOWN (life-critical: respond fast)
   head_down_lost_duration: 0.3  # s: face vanished while the head was dropping -> HEAD_DOWN
+  head_down_grace: 0.3      # s: tracking may flicker this long without restarting the timer
   head_down_lost_pitch: 10  # face lost within head_down_memory s after the head was this far down
   head_down_memory: 1.5     # s
-  tilt_roll_delta: 30       # deg towards a shoulder
-  tilt_duration: 2.0
+  tilt_roll_delta: 25       # deg towards a shoulder ...
+  tilt_duration: 1.0        # ... for this long, whatever the eyes
+  tilt_eyes_roll_delta: 15  # deg towards a shoulder with the eyes shut / not visible ...
+  tilt_eyes_duration: 0.5   # ... for this long
   perclos_critical: 0.40
   critical_clear_after: 2.0 # eyes open & head normal this long -> leave CRITICAL
 

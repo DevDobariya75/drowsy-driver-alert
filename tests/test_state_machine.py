@@ -145,7 +145,7 @@ def test_low_ear_while_looking_away_is_not_microsleep(sm):
 
 def test_short_head_tilt_is_ok(sm):
     d = Driver(sm)
-    d.run(1.5, roll=35)
+    d.run(0.7, roll=35)            # shorter than tilt_duration (1 s)
     d.run(1)
     assert max(d.levels) == Level.OK
 
@@ -396,4 +396,37 @@ def test_blink_while_looking_down_is_not_head_down(sm):
     for _ in range(5):
         d.run(1.0, pitch=25, ear=LOOK_DOWN_EAR)
         d.run(0.25, pitch=25, ear=CLOSED)   # normal blink while reading the dashboard
+    assert Level.CRITICAL not in d.levels
+
+
+def test_head_down_detected_when_tracking_flickers(sm):
+    """Head down: the tracker alternates between losing the face and garbage landmarks
+    that look like open eyes. That must not keep restarting the alarm timer."""
+    d = Driver(sm)
+    d.run(3)
+    d.run(0.3, pitch=25)
+    for _ in range(4):
+        d.run(0.13, face=False)
+        d.run(0.07, pitch=40, ear=OPEN)
+    assert "HEAD_DOWN" in d.reasons
+
+
+def test_tilt_is_fast(sm):
+    d = Driver(sm)
+    d.run(3)
+    s = d.run(1.1, roll=28)
+    assert s.level == Level.CRITICAL and "HEAD_TILT" in s.reasons
+
+
+def test_tilt_with_eyes_shut_is_faster(sm):
+    d = Driver(sm)
+    d.run(3)
+    s = d.run(0.7, roll=18, ear=CLOSED)
+    assert s.level == Level.CRITICAL and "HEAD_TILT" in s.reasons
+
+
+def test_small_tilt_with_open_eyes_is_ok(sm):
+    d = Driver(sm)
+    d.run(3)
+    d.run(5, roll=18)
     assert Level.CRITICAL not in d.levels

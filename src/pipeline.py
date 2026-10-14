@@ -72,7 +72,7 @@ class DrowsinessPipeline:
 
         obs = Observation(t=t, face=False, very_dark=self.light.very_dark)
         if pts is not None:
-            angles = self.pose.estimate(pts)
+            angles = self.pose.estimate(self.landmarker.last_3d)
             if angles is not None:
                 ear_l, ear_r = eye_ears(pts)
                 mar = self.ema["mar"].update(mouth_aspect_ratio(pts))

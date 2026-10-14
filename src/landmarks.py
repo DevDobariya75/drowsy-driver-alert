@@ -1,4 +1,6 @@
-"""MediaPipe Face Mesh wrapper: BGR frame -> (478, 2) landmark pixel coordinates."""
+"""MediaPipe Face Mesh wrapper: BGR frame -> (478, 2) landmark pixel coordinates.
+
+The matching 3D points (x, y, depth z, all in pixels) are kept in `last_3d` for head pose."""
 import cv2
 import mediapipe as mp
 import numpy as np
@@ -15,6 +17,7 @@ class FaceLandmarker:
             min_detection_confidence=min_detection_confidence,
             min_tracking_confidence=min_tracking_confidence,
         )
+        self.last_3d = None
 
     def process(self, frame_bgr):
         """Return an (N, 2) float32 array of pixel coordinates, or None if no face."""
@@ -22,11 +25,14 @@ class FaceLandmarker:
         rgb = cv2.cvtColor(frame_bgr, cv2.COLOR_BGR2RGB)
         rgb.flags.writeable = False
         result = self.mesh.process(rgb)
+        self.last_3d = None
         if not result.multi_face_landmarks:
             return None
         lm = result.multi_face_landmarks[0].landmark
-        pts = np.fromiter((c for p in lm for c in (p.x, p.y)), dtype=np.float32, count=len(lm) * 2)
-        return pts.reshape(-1, 2) * np.array([w, h], dtype=np.float32)
+        pts = np.fromiter((c for p in lm for c in (p.x, p.y, p.z)), dtype=np.float32, count=len(lm) * 3)
+        # MediaPipe z uses roughly the same scale as x (normalized by image width).
+        self.last_3d = pts.reshape(-1, 3) * np.array([w, h, w], dtype=np.float32)
+        return self.last_3d[:, :2].copy()
 
     def close(self):
         self.mesh.close()

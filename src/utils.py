@@ -29,15 +29,23 @@ class EMA:
 
 
 class ConditionTimer:
-    """Tracks how long a boolean condition has been continuously true."""
+    """Tracks how long a boolean condition has been continuously true.
 
-    def __init__(self):
+    grace: the condition may drop out for up to this many seconds without
+    restarting the timer (e.g. a face that flickers in and out of tracking)."""
+
+    def __init__(self, grace: float = 0.0):
+        self.grace = grace
         self.since = None
+        self.last_true = None
 
     def update(self, condition: bool, t: float) -> float:
         if condition:
             if self.since is None:
                 self.since = t
+            self.last_true = t
+            return t - self.since
+        if self.since is not None and self.grace > 0 and t - self.last_true <= self.grace:
             return t - self.since
         self.since = None
         return 0.0

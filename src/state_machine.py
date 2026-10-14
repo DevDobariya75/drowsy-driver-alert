@@ -4,7 +4,8 @@ CRITICAL (continuous alarm): strong, direct evidence of sleep
   * MICROSLEEP    both eyes closed >= 1 s
   * HEAD_NOD      head dropped >= 20 deg for 1 s with the eyelids down,
                   or head hanging >= 35 deg for 2 s
-  * HEAD_TILT     head on a shoulder >= 30 deg for 2 s
+  * HEAD_TILT     head on a shoulder >= 25 deg for 1 s, or >= 15 deg for 0.5 s with
+                  the eyes shut / not visible
   * HEAD_DOWN     head down and the eyes cannot be seen: the face vanished (0.3 s)
                   while the head was dropping (camera sees the top of the head), or
                   the face is tracked but neither eye is visibly open (0.5 s)
@@ -72,14 +73,17 @@ class DriverStateMachine:
         self.closed_timer = ConditionTimer()
         self.nod = ConditionTimer()
         self.hang = ConditionTimer()
-        self.tilt = ConditionTimer()
+        self.tilt = ConditionTimer(grace=0.2)
+        self.tilt_eyes = ConditionTimer(grace=0.2)   # tilted with eyes shut / not visible
         self.away = ConditionTimer()
         self.down = ConditionTimer()
         self.no_face = ConditionTimer()
         self.awake = ConditionTimer()
         self.fatigue = ConditionTimer()
-        self.hidden = ConditionTimer()      # head down, eyes not visible (face tracked)
-        self.lost_down = ConditionTimer()   # face lost while the head was dropping
+        # Head down with the eyes not visible. One timer for both ways it shows up
+        # (face lost while dropping / face tracked but eyes hidden): with the head
+        # down the tracker flickers between the two, which must not restart it.
+        self.head_down = ConditionTimer(grace=th.get("head_down_grace", 0.3))
         self.recent_pitch = deque()         # (t, d_pitch) of the last seconds with a face
         self.lost_while_down = None         # decided once, when the face disappears
 
@@ -95,7 +99,7 @@ class DriverStateMachine:
         self.base_pitch, self.base_yaw, self.base_roll = baseline.pitch, baseline.yaw, baseline.roll
         # Timers measured against the old baseline are meaningless now.
         for timer in (self.closed_timer, self.nod, self.hang, self.tilt, self.away, self.down,
-                      self.awake, self.fatigue, self.hidden, self.lost_down):
+                      self.awake, self.fatigue, self.head_down, self.tilt_eyes):
             timer.since = None
         self.recent_pitch.clear()
         self.lost_while_down = None
@@ -121,18 +125,18 @@ class DriverStateMachine:
             self._pause_eye_stats()
             self.eyes.reset()
             for timer in (self.closed_timer, self.nod, self.hang, self.tilt, self.away,
-                          self.down, self.awake, self.fatigue, self.hidden):
+                          self.down, self.awake, self.fatigue, self.tilt_eyes):
                 timer.update(False, t)
             if self.lost_while_down is None:   # was the head going down just before?
                 self.lost_while_down = any(dp >= th["head_down_lost_pitch"] for _, dp in self.recent_pitch)
-            if self.lost_down.update(self.lost_while_down, t) >= th["head_down_lost_duration"]:
+            if (self.head_down.update(self.lost_while_down, t) >= th["head_down_lost_duration"]
+                    and self.lost_while_down):
                 critical.append("HEAD_DOWN")
             if self.no_face.update(True, t) >= th["no_face_warning"]:
                 warning.append("LOW_VISIBILITY" if o.very_dark else "NO_FACE")
             keep_latched = True  # driver slumped out of view during an alarm: keep alarming
         else:
             self.no_face.update(False, t)
-            self.lost_down.update(False, t)
             self.lost_while_down = None
             d_pitch = o.pitch - self.base_pitch
             self.recent_pitch.append((t, d_pitch))
@@ -173,10 +177,16 @@ class DriverStateMachine:
             no_open_eye = (p_l is not None and p_r is not None
                            and min(p_l, p_r) >= th["hidden_model_p"])
             eyes_hidden = self.eyes.score >= th["nod_eye_score"] or no_open_eye
-            if self.hidden.update(d_pitch >= th["hidden_pitch_delta"] and eyes_hidden and not yawning,
-                                  t) >= th["head_down_duration"]:
+            hidden_down = d_pitch >= th["hidden_pitch_delta"] and eyes_hidden and not yawning
+            # The grace period only bridges tracking flicker; the alarm itself needs the
+            # condition right now (so a blink while looking down is not stretched into one).
+            if self.head_down.update(hidden_down, t) >= th["head_down_duration"] and hidden_down:
                 critical.append("HEAD_DOWN")
-            if self.tilt.update(abs(d_roll) >= th["tilt_roll_delta"], t) >= th["tilt_duration"]:
+            tilted = abs(d_roll) >= th["tilt_roll_delta"]
+            if self.tilt.update(tilted, t) >= th["tilt_duration"] and tilted:
+                critical.append("HEAD_TILT")
+            tilted_eyes = abs(d_roll) >= th["tilt_eyes_roll_delta"] and eyes_hidden and not yawning
+            if self.tilt_eyes.update(tilted_eyes, t) >= th["tilt_eyes_duration"] and tilted_eyes:
                 critical.append("HEAD_TILT")
             if self.away.update(abs(d_yaw) >= th["distraction_yaw_delta"], t) >= th["distraction_duration"]:
                 warning.append("DISTRACTION")

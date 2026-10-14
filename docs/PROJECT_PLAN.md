@@ -102,7 +102,7 @@ MAR = |upper lip(13) − lower lip(14)| / |left corner(78) − right corner(308)
 
 ### (f) Head pose: nodding and tilting
 - Take 6 landmarks: nose tip (1), chin (152), eye corners (33, 263), and mouth corners (61, 291).
-- Use **OpenCV `solvePnP`** with a generic 3D face model to get the **pitch** (nod), **yaw** (turn) and **roll** (tilt) angles.
+- Read the **pitch** (nod), **yaw** (turn) and **roll** (tilt) angles directly from MediaPipe's 3D landmarks (forehead→chin and eye→eye axes). This replaced an earlier `solvePnP` fit, which underestimated angles and sometimes flipped sign.
 
 | Condition | Meaning | Action |
 |---|---|---|
@@ -181,7 +181,7 @@ IOT_PROJECT/
 │   ├── preprocess.py        # Light normalization (section 2.4)
 │   ├── landmarks.py         # MediaPipe Face Mesh wrapper
 │   ├── metrics.py           # EAR, MAR, PERCLOS, blink counter
-│   ├── head_pose.py         # solvePnP → pitch, yaw, roll
+│   ├── head_pose.py         # 3D landmarks → pitch, yaw, roll
 │   ├── calibration.py       # 10 s baseline capture
 │   ├── state_machine.py     # OK / WARNING / CRITICAL logic
 │   └── utils.py             # EMA filter, timers, FPS counter, logger

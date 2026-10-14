@@ -1,63 +1,61 @@
-"""Head pose (pitch / yaw / roll in degrees) from 6 landmarks using solvePnP.
+"""Head pose (pitch / yaw / roll in degrees) from MediaPipe's 3D face landmarks.
 
-Angle convention (camera looking at the driver):
-  pitch > 0  head tilts DOWN (nodding)     pitch < 0  head tilts up
+MediaPipe gives every landmark a depth (z) as well as x, y, so the head's
+orientation can be read directly from the face's own axes, with no solver:
+  x axis  eye corner -> eye corner and cheek -> cheek (left to right across the face)
+  y axis  forehead -> chin (down the face)
+  z axis  x cross y (out of the back of the head)
+Unlike a 6-point solvePnP fit to a generic face model, this cannot jump to a
+mirrored solution or fail, and the sign of each angle is fixed by geometry.
+
+Angle convention (camera axes: x right, y down, z away from the camera):
+  pitch > 0  head tilts DOWN (chin moves away from the camera)
   yaw        head turns left/right
   roll       head tilts toward a shoulder
-Absolute values depend on the camera mounting, so the decision logic always
-compares against the baseline measured during calibration."""
+Absolute values depend on the camera mounting and the face, so the decision
+logic always compares against the baseline measured during calibration."""
 import cv2
 import numpy as np
 
-# MediaPipe indices: nose tip, chin, eye outer corners, mouth corners
-# (33 / 61 are on the image-left side of a non-mirrored frame).
-POSE_LANDMARKS = [1, 152, 33, 263, 61, 291]
-
-# Generic 3D face model (mm-ish), in camera-style axes: x right, y DOWN,
-# z AWAY from the camera. A face looking straight at the camera gives R = I.
-MODEL_POINTS = np.array([
-    (0.0, 0.0, 0.0),         # nose tip
-    (0.0, 330.0, 65.0),      # chin
-    (-225.0, -170.0, 135.0), # eye outer corner (image left)
-    (225.0, -170.0, 135.0),  # eye outer corner (image right)
-    (-150.0, 150.0, 125.0),  # mouth corner (image left)
-    (150.0, 150.0, 125.0),   # mouth corner (image right)
-], dtype=np.float64)
+# MediaPipe indices (33 / 234 / 61 are on the image-left side of a non-mirrored frame).
+EYE_L, EYE_R = 33, 263       # outer eye corners
+CHEEK_L, CHEEK_R = 234, 454  # face edges at eye level
+FOREHEAD, CHIN = 10, 152
 
 
 def rotation_to_euler(R):
-    """Rotation matrix -> (pitch, yaw, roll) in degrees (rotations about x, y, z)."""
+    """Rotation matrix -> (pitch, yaw, roll) in degrees, for R = Rz @ Ry @ Rx."""
     angles, *_ = cv2.RQDecomp3x3(R)
     return float(angles[0]), float(angles[1]), float(angles[2])
 
 
-class HeadPoseEstimator:
-    def __init__(self, frame_width: int, frame_height: int):
-        f = float(frame_width)  # approximate focal length = image width
-        self.camera_matrix = np.array(
-            [[f, 0, frame_width / 2], [0, f, frame_height / 2], [0, 0, 1]], dtype=np.float64
-        )
-        self.dist = np.zeros((4, 1))
-        self.rvec = None
-        self.tvec = None
+def face_rotation(pts3d):
+    """3x3 rotation whose columns are the face's x, y, z axes in camera coordinates."""
+    p = np.asarray(pts3d, dtype=np.float64)
+    xv = (p[EYE_R] - p[EYE_L]) + (p[CHEEK_R] - p[CHEEK_L])
+    yv = p[CHIN] - p[FOREHEAD]
+    nx = np.linalg.norm(xv)
+    if nx < 1e-6:
+        return None
+    x = xv / nx
+    yv = yv - (yv @ x) * x            # make y exactly perpendicular to x
+    ny = np.linalg.norm(yv)
+    if ny < 1e-6:
+        return None
+    y = yv / ny
+    return np.column_stack([x, y, np.cross(x, y)])
 
-    def estimate(self, pts):
-        """Return (pitch, yaw, roll) or None if solvePnP fails."""
-        image_points = pts[POSE_LANDMARKS].astype(np.float64)
-        use_guess = self.rvec is not None
-        ok, rvec, tvec = cv2.solvePnP(
-            MODEL_POINTS, image_points, self.camera_matrix, self.dist,
-            rvec=self.rvec.copy() if use_guess else None,
-            tvec=self.tvec.copy() if use_guess else None,
-            useExtrinsicGuess=use_guess, flags=cv2.SOLVEPNP_ITERATIVE,
-        )
-        if not ok or tvec[2, 0] <= 0:  # face must be in front of the camera
-            self.reset()
+
+class HeadPoseEstimator:
+    def __init__(self, frame_width: int = 0, frame_height: int = 0):
+        pass  # no camera model needed
+
+    def estimate(self, pts3d):
+        """(N, 3) landmarks in pixels (x, y, z) -> (pitch, yaw, roll), or None."""
+        if pts3d is None or np.shape(pts3d)[1] < 3:
             return None
-        self.rvec, self.tvec = rvec, tvec
-        R, _ = cv2.Rodrigues(rvec)
-        return rotation_to_euler(R)
+        R = face_rotation(pts3d)
+        return None if R is None else rotation_to_euler(R)
 
     def reset(self):
-        """Forget the previous solution (call when the face is lost)."""
-        self.rvec = self.tvec = None
+        pass  # stateless

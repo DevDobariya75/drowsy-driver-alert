@@ -45,8 +45,8 @@ camera ─▶ light normalization ─▶ MediaPipe Face Mesh ─▶ EAR, MAR, he
 | Reason | Rule |
 |---|---|
 | MICROSLEEP | both eyes closed ≥ 1.0 s |
-| HEAD_NOD | head ≥ 20° down for 1 s **with eyelids down**, or head hanging ≥ 35° for 2 s |
-| HEAD_TILT | head ≥ 30° towards a shoulder for 2 s |
+| HEAD_NOD | head ≥ 20° down for 1 s **with eyelids down**, or head hanging ≥ 35° for 1 s |
+| HEAD_TILT | head ≥ 25° towards a shoulder for 1 s, or ≥ 15° for 0.5 s with the eyes shut / not visible |
 | HEAD_DOWN | head down and **eyes not visible**: the face disappears while the head is dropping (camera sees the top of the head) → alarm in **0.3 s**; or the head is ≥ 15° down and no open eye can be seen → alarm in **0.5 s** |
 | PERCLOS_HIGH | eyes closed ≥ 40% of the last minute |
 
@@ -108,7 +108,7 @@ src/
   preprocess.py      light normalization
   landmarks.py       MediaPipe Face Mesh
   metrics.py         EAR, MAR, blinks, PERCLOS, yawns
-  head_pose.py       solvePnP -> pitch / yaw / roll
+  head_pose.py       MediaPipe 3D landmarks -> pitch / yaw / roll (no solver)
   calibration.py     per-driver baseline
   state_machine.py   OK / WARNING / CRITICAL decisions
   eye_classifier.py  optional CNN (OpenCV DNN)
