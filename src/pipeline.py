@@ -67,7 +67,7 @@ class DrowsinessPipeline:
         frame, info = self.light.process(frame)
         self.timer.lap("preprocess")
 
-        pts = self.landmarker.process(frame)
+        pts = self.landmarker.process(frame, t)
         self.timer.lap("landmarks")
 
         obs = Observation(t=t, face=False, very_dark=self.light.very_dark)

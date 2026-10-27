@@ -7,7 +7,8 @@ CRITICAL (continuous alarm): strong, direct evidence of sleep
   * HEAD_TILT     head on a shoulder >= 25 deg for 1 s, or >= 15 deg for 0.5 s with
                   the eyes shut / not visible
   * HEAD_DOWN     head down and the eyes cannot be seen: the face vanished (0.3 s)
-                  while the head was dropping (camera sees the top of the head), or
+                  while the head was dropping (camera sees the top of the head) or
+                  just after the eyes had been shut for longer than a blink, or
                   the face is tracked but neither eye is visibly open (0.5 s)
   * PERCLOS_HIGH  eyes closed >= 40% of the last minute
   Stays latched until the driver is clearly awake again for critical_clear_after s.
@@ -85,6 +86,7 @@ class DriverStateMachine:
         # down the tracker flickers between the two, which must not restart it.
         self.head_down = ConditionTimer(grace=th.get("head_down_grace", 0.3))
         self.recent_pitch = deque()         # (t, d_pitch) of the last seconds with a face
+        self.last_seen = None               # (d_pitch, eyes closed for s) on the last face frame
         self.lost_while_down = None         # decided once, when the face disappears
 
         self.critical_latched = False
@@ -102,6 +104,7 @@ class DriverStateMachine:
                       self.awake, self.fatigue, self.head_down, self.tilt_eyes):
             timer.since = None
         self.recent_pitch.clear()
+        self.last_seen = None
         self.lost_while_down = None
         self.blinks.reset_closure()
         self.critical_latched = False
@@ -111,6 +114,20 @@ class DriverStateMachine:
         if t - self.last_fired.get(reason, -1e9) >= self.th["warning_cooldown"]:
             self.last_fired[reason] = t
             self.pulses[reason] = t + self.th["warning_pulse"]
+
+    def _lost_while_down(self) -> bool:
+        """The face just vanished: was the driver falling asleep forward?
+        Either the head was clearly down in the last seconds, or the eyes had been
+        shut for longer than a blink and the head had started to drop (the tracker
+        can lose a falling face before it has dropped far)."""
+        th = self.th
+        if any(dp >= th["head_down_lost_pitch"] for _, dp in self.recent_pitch):
+            return True
+        if self.last_seen is None:
+            return False
+        d_pitch, closed_for = self.last_seen
+        return (closed_for >= th.get("head_down_lost_closed_for", 0.4)
+                and d_pitch >= th.get("head_down_lost_pitch_closed", 5))
 
     def _pause_eye_stats(self):
         self.blinks.reset_closure()
@@ -128,7 +145,7 @@ class DriverStateMachine:
                           self.down, self.awake, self.fatigue, self.tilt_eyes):
                 timer.update(False, t)
             if self.lost_while_down is None:   # was the head going down just before?
-                self.lost_while_down = any(dp >= th["head_down_lost_pitch"] for _, dp in self.recent_pitch)
+                self.lost_while_down = self._lost_while_down()
             if (self.head_down.update(self.lost_while_down, t) >= th["head_down_lost_duration"]
                     and self.lost_while_down):
                 critical.append("HEAD_DOWN")
@@ -163,6 +180,7 @@ class DriverStateMachine:
                 self.perclos.update(self.eyes.score >= th["perclos_score"], t)
 
             closed_for = self.closed_timer.update(closed, t)
+            self.last_seen = (d_pitch, closed_for)
             if closed_for >= th["microsleep"]:
                 critical.append("MICROSLEEP")
 

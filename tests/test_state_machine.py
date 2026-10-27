@@ -347,6 +347,27 @@ def test_face_lost_while_head_drops_is_critical(sm):
     assert s.level == Level.CRITICAL and "HEAD_DOWN" in s.reasons
 
 
+def test_face_lost_with_eyes_shut_as_head_starts_to_drop_is_critical(sm):
+    """Real clip: eyes shut ~0.9 s, head only 8 deg down when the tracker lost the face."""
+    d = Driver(sm)
+    d.run(3)
+    d.run(0.5, ear=CLOSED, pitch=1)
+    s = d.run(0.2, ear=CLOSED, pitch=8)
+    assert s.level != Level.CRITICAL   # not yet a microsleep (< 1 s)
+    s = d.run(0.4, face=False)
+    assert s.level == Level.CRITICAL and "HEAD_DOWN" in s.reasons
+
+
+def test_blink_then_face_covered_is_not_head_down(sm):
+    d = Driver(sm)
+    d.run(3)
+    d.run(1.0, pitch=8)
+    d.run(0.2, ear=CLOSED, pitch=8)   # normal blink while looking slightly down ...
+    d.run(3, face=False)              # ... then a hand covers the camera
+    assert Level.CRITICAL not in d.levels
+    assert "NO_FACE" in d.reasons
+
+
 def test_face_lost_with_head_up_is_only_a_warning(sm):
     d = Driver(sm)
     d.run(3)
