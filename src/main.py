@@ -1,7 +1,7 @@
 """Entry point.
 
     python src/main.py --config config/laptop.yaml           # laptop webcam + speaker
-    python src/main.py --config config/pi.yaml               # Raspberry Pi camera + buzzer
+    python src/main.py --config config/pi.yaml               # Raspberry Pi + USB webcam + buzzer
     python src/main.py --config config/laptop.yaml --max-fps 15 --cpu-cores 1   # simulate a Pi
     python src/main.py --config config/laptop.yaml --video tests/videos/clip.mp4
 

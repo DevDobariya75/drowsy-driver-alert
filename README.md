@@ -6,7 +6,8 @@ fatigue signs: PERCLOS, yawning, slow blinks and looking away. Everything runs o
 
 The **same code** runs on a laptop and on a Raspberry Pi; only the config file changes.
 
-The trained eye-state model (`models/eye_state.onnx`, ~290 KB) is included, so no training is needed to run it.
+The trained eye-state model (`models/eye_state.onnx`, ~290 KB) and MediaPipe's face model
+(`models/face_landmarker.task`, ~3.7 MB) are included, so no training or download is needed to run it.
 The full project plan is in [`docs/PROJECT_PLAN.md`](docs/PROJECT_PLAN.md).
 
 ## Quick start (laptop)
@@ -14,7 +15,7 @@ The full project plan is in [`docs/PROJECT_PLAN.md`](docs/PROJECT_PLAN.md).
 ```powershell
 git clone <your-repo-url> drowsy-driver-alert
 cd drowsy-driver-alert
-py -3.11 -m venv venv            # Python 3.11 (MediaPipe 0.10.21 needs <= 3.12)
+py -3.11 -m venv venv            # Python 3.11 recommended (3.13 also works, see requirements.txt)
 venv\Scripts\activate
 pip install -r requirements.txt
 
@@ -103,10 +104,10 @@ config/        base.yaml (all thresholds), laptop.yaml, pi.yaml, test.yaml
 src/
   main.py            entry point
   pipeline.py        whole detection chain (hardware independent)
-  camera/            webcam.py, picam.py (Pi), video_file.py (tests)
+  camera/            webcam.py (laptop + Pi USB webcam), picam.py (ribbon camera, unused), video_file.py (tests)
   alarm/             speaker.py (laptop), gpio_buzzer.py (Pi), console.py (tests)
   preprocess.py      light normalization
-  landmarks.py       MediaPipe Face Mesh
+  landmarks.py       MediaPipe Face Landmarker (Tasks API, models/face_landmarker.task)
   metrics.py         EAR, MAR, blinks, PERCLOS, yawns
   head_pose.py       MediaPipe 3D landmarks -> pitch / yaw / roll (no solver)
   calibration.py     per-driver baseline
@@ -127,11 +128,16 @@ python tests/run_video_tests.py --lighting       # pass/fail table, 5 lighting v
 
 ## Moving to the Raspberry Pi (Phase 3)
 
+Hardware: Raspberry Pi 4 + **USB webcam** + buzzer module. Full step-by-step guide: [`docs/PHASE3.md`](docs/PHASE3.md).
+
 ```bash
-sudo apt install -y python3-picamera2 python3-gpiozero python3-venv
+sudo apt install -y python3-gpiozero python3-lgpio python3-venv libportaudio2
 python3 -m venv --system-site-packages venv && source venv/bin/activate
 pip install -r requirements.txt
 python src/main.py --config config/pi.yaml
 ```
-Buzzer module: VCC to pin 2 (5 V), GND to pin 6, I/O to pin 12 (GPIO18).
+Works on Raspberry Pi OS **Bookworm** (Python 3.11, MediaPipe 0.10.21) and **Trixie** (Python 3.13,
+MediaPipe 1.1.1); `requirements.txt` picks the right versions by itself.
+The USB webcam plugs into a USB port and needs no extra setup (`config/pi.yaml`: `camera: webcam`, `camera_index: 0`).
+Buzzer module: S to pin 12 (GPIO18), middle (+) to pin 1 (3.3 V), − to pin 6 (GND).
 If it beeps when it should be silent, set `buzzer_active_high: false` in `pi.yaml`.

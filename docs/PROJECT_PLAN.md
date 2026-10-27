@@ -126,11 +126,11 @@ MAR = |upper lip(13) − lower lip(14)| / |left corner(78) − right corner(308)
 |---|---|---|---|---|
 | 1 | **Raspberry Pi** | Raspberry Pi 4 Model B (4 GB) or Raspberry Pi 5 (4 GB), **with its official power adapter** | Runs the model | 5,000–8,000 |
 | 2 | **Storage** | 32 GB microSD card (Class 10 / A1, SanDisk or Samsung) + card reader | OS + code + model | 400–600 |
-| 3 | **Camera** | Raspberry Pi Camera Module 3 (or v2) **with ribbon cable**. A USB webcam (720p) also works | Captures the driver's face | 1,500–3,000 |
+| 3 | **Camera** | **USB webcam** (720p or 1080p, plug-and-play). *(A Pi ribbon camera also works with `camera: picamera2`)* | Captures the driver's face | 800–2,000 |
 | 4 | **Buzzer** | **Active buzzer module (5 V, 3-pin: VCC, GND, I/O)**. The module has a built-in transistor, so it connects directly to GPIO | Alarm | 50–100 |
 | 5 | **Connectors** | Female-to-female jumper wires (pack of 10–20) | Connects the buzzer to the GPIO pins | 50–100 |
 
-> **Note:** For the Pi 5, the camera needs the **Pi 5 camera cable (22-pin to 15-pin)**. Check before buying.
+> **Note:** We use a **USB webcam**, so no camera ribbon cable or camera drivers are needed. The same webcam works on the laptop and the Pi.
 
 ## 1.5 Phase 1 deliverables
 - ✅ Requirements document (sections 1.1–1.2)
@@ -157,7 +157,7 @@ pip install mediapipe opencv-python numpy pyyaml pytest
 pip freeze > requirements.txt
 ```
 
-> Use **Python 3.11** on the laptop because the Pi uses Python 3.11. This avoids version surprises later.
+> Use **Python 3.11** on the laptop. The Pi may use 3.11 (Bookworm) or 3.13 (Trixie); `requirements.txt` picks matching package versions for each, and the code is the same.
 
 ## 2.2 Project structure (hardware-independent design)
 
@@ -165,13 +165,13 @@ pip freeze > requirements.txt
 IOT_PROJECT/
 ├── config/
 │   ├── laptop.yaml          # camera: webcam, alarm: speaker, debug display ON
-│   └── pi.yaml              # camera: picamera2, alarm: gpio buzzer, display OFF
+│   └── pi.yaml              # camera: webcam (USB), alarm: gpio buzzer, display OFF
 ├── src/
 │   ├── main.py              # entry point: python src/main.py --config config/laptop.yaml
 │   ├── camera/
 │   │   ├── base.py          # Camera interface: start(), read(), stop()
-│   │   ├── webcam.py        # OpenCV VideoCapture (laptop / USB cam)
-│   │   ├── picam.py         # Picamera2 (Raspberry Pi camera)
+│   │   ├── webcam.py        # OpenCV VideoCapture (laptop webcam + USB webcam on the Pi)
+│   │   ├── picam.py         # Picamera2 (only for a ribbon camera; not used)
 │   │   └── video_file.py    # Plays recorded .mp4 (for testing)
 │   ├── alarm/
 │   │   ├── base.py          # Alarm interface: set_level(OK/WARNING/CRITICAL)
@@ -199,7 +199,7 @@ The main logic **never** talks to the hardware directly. It only uses `Camera` a
 
 ```yaml
 # config/laptop.yaml               # config/pi.yaml
-camera: webcam                      camera: picamera2
+camera: webcam                      camera: webcam   (USB webcam)
 alarm:  speaker                     alarm:  gpio_buzzer
 buzzer_pin: null                    buzzer_pin: 18
 resolution: [640, 480]              resolution: [640, 480]
@@ -208,7 +208,7 @@ show_window: true                   show_window: false
 
 ```python
 # main.py (simplified)
-cam   = make_camera(cfg)     # webcam.py on laptop, picam.py on Pi
+cam   = make_camera(cfg)     # webcam.py on both laptop and Pi (USB webcam)
 alarm = make_alarm(cfg)      # speaker.py on laptop, gpio_buzzer.py on Pi
 ```
 
@@ -221,7 +221,7 @@ Imports such as `picamera2` and `gpiozero` are placed **inside** `picam.py` / `g
 | Step | Build | Test it by |
 |---|---|---|
 | 1 | `camera/webcam.py` + `video_file.py`: show live frames, FPS counter | See video with FPS on screen |
-| 2 | `landmarks.py`: MediaPipe Face Mesh (`max_num_faces=1`, `refine_landmarks=True`) | Draw eye/mouth points on the face |
+| 2 | `landmarks.py`: MediaPipe Face Landmarker, Tasks API (`num_faces=1`, VIDEO mode, 478 points) | Draw eye/mouth points on the face |
 | 3 | `metrics.py`: EAR calculation | Print EAR, then blink and watch it drop below 0.2 |
 | 4 | Blink and micro-sleep timer (time based) | Close eyes 1.5 s, see "MICRO-SLEEP" printed |
 | 5 | `calibration.py`: 10 s baseline EAR + head angles | Threshold adapts to different people / glasses |
@@ -264,7 +264,7 @@ mean_brightness = gray.mean()          # 0 (black) → 255 (white)
 
 ### (c) Camera-level settings
 - Laptop: keep auto-exposure on.
-- Pi (`picam.py`): enable **auto-exposure + auto-white-balance**, and allow longer exposure in low light (`AeExposureMode`). Limit the frame duration so FPS stays ≥ 15.
+- Pi (USB webcam): the webcam's own auto-exposure is used. In dim light some webcams lower their FPS to get a brighter image; this can be turned off with `v4l2-ctl` (see `docs/PHASE3.md`, troubleshooting).
 
 ### (d) Light-independent decisions
 - **Per-driver calibration** (EAR threshold = 75% of the baseline) means the threshold adapts to how the eyes look in *current* lighting. Re-run calibration automatically if the brightness changes a lot for more than 30 s (e.g., day to night).
@@ -348,10 +348,12 @@ Automate this with a script that prints a **pass/fail table**, and re-run it aft
 # PHASE 3: Hardware Assembly and Prototype
 
 > **Goal:** Assemble the components, set up the Raspberry Pi, deploy the Phase 2 software, and get a working prototype.
+>
+> **Detailed, up-to-date steps (USB webcam, pendrive boot, buzzer): [`PHASE3.md`](PHASE3.md).** This section is the short overview.
 
 ## 3.1 Prepare the Raspberry Pi (storage + OS)
 1. Insert the microSD card into the laptop. Open **Raspberry Pi Imager**.
-2. Choose **Raspberry Pi OS (64-bit) – Bookworm**.
+2. Choose **Raspberry Pi OS (64-bit)**: Trixie (Python 3.13) or Bookworm (Python 3.11), both work.
 3. In settings (⚙): set the hostname (`drowsy-pi`), **enable SSH**, set the username/password, and Wi-Fi.
 4. Flash, insert the card into the Pi, and power on.
 5. Connect from the laptop: `ssh pi@drowsy-pi.local`
@@ -360,15 +362,16 @@ Automate this with a script that prints a **pass/fail table**, and re-run it aft
    sudo apt update && sudo apt full-upgrade -y
    ```
 
-## 3.2 Connect the camera
-1. **Power off the Pi** first.
-2. Lift the CSI connector latch and insert the ribbon cable (**blue side facing the Ethernet/USB ports** on Pi 4), then press the latch down.
-3. Power on and test:
+## 3.2 Connect the camera (USB webcam)
+1. Plug the USB webcam into a **black USB 2.0 port** on the Pi (keep the blue ports for the boot pendrive).
+2. Check it is detected:
    ```bash
-   rpicam-hello -t 5000         # preview for 5 s
-   rpicam-still -o test.jpg     # capture a photo
+   lsusb                        # webcam brand is listed
+   ls /dev/video*               # /dev/video0 = the webcam
+   sudo apt install -y fswebcam
+   fswebcam -r 640x480 -S 30 --no-banner test.jpg   # take a test photo
    ```
-   (If using a USB webcam, just plug it in. `ls /dev/video*` should show it.)
+   No drivers or config changes are needed. Full steps: `docs/PHASE3.md`.
 
 ## 3.3 Connect the buzzer (with jumper wires)
 
@@ -399,20 +402,21 @@ python3 -c "from gpiozero import Buzzer; from time import sleep; b=Buzzer(18); b
 
 ## 3.4 Install the software on the Pi
 ```bash
-sudo apt install -y python3-picamera2 python3-opencv python3-gpiozero python3-venv
+sudo apt install -y python3-gpiozero python3-lgpio python3-venv
 git clone <your-repo-url> ~/IOT_PROJECT        # or copy with scp / WinSCP
 cd ~/IOT_PROJECT
-python3 -m venv --system-site-packages venv    # lets venv use apt's picamera2/gpiozero
+python3 -m venv --system-site-packages venv    # lets venv use apt's gpiozero
 source venv/bin/activate
 pip install -r requirements.txt                # mediapipe, numpy, pyyaml ...
 ```
-> If `mediapipe` fails to install on the Pi, check that you're using 64-bit OS + Python 3.11. As a fallback, use **TFLite Face Mesh** or **dlib 68-landmarks** behind the same `landmarks.py` interface, so no other code changes.
+> `requirements.txt` installs MediaPipe 0.10.21 on Python 3.11 (Bookworm) and MediaPipe 1.1.1 on Python 3.13 (Trixie). `landmarks.py` uses the MediaPipe **Tasks** FaceLandmarker (`models/face_landmarker.task`), which both versions support; the old `mp.solutions.face_mesh` API no longer exists in 1.x.
+> If `mediapipe` fails to install on the Pi, check that you're using the 64-bit OS. As a fallback, use **TFLite Face Mesh** or **dlib 68-landmarks** behind the same `landmarks.py` interface, so no other code changes.
 
 ## 3.5 Run the prototype
 ```bash
 python src/main.py --config config/pi.yaml
 ```
-- The **only** difference from the laptop is the config file. The camera becomes `picam.py` and the alarm becomes `gpio_buzzer.py`.
+- The **only** difference from the laptop is the config file. The camera stays `webcam.py` (USB webcam) and the alarm becomes `gpio_buzzer.py`.
 - On start: 1 short beep means the system is armed. Then the 10 s calibration runs (look straight ahead).
 - Check the logs for **FPS (target ≥ 15)**, CPU usage, and temperature (`vcgencmd measure_temp`).
 
@@ -451,7 +455,7 @@ Now the Pi powers on and runs detection automatically, with no laptop needed.
 - Power with the official adapter (bench) or a good car USB-C adapter (in vehicle, 5 V 3 A).
 
 ## 3.8 Phase 3 deliverables
-- ✅ Raspberry Pi with OS, camera and buzzer connected
+- ✅ Raspberry Pi with OS, USB webcam and buzzer connected
 - ✅ Phase 2 software running on the Pi using `pi.yaml`
 - ✅ Auto-start on boot
 - ✅ Working prototype: closing eyes for 1 s sounds the buzzer

@@ -1,6 +1,7 @@
 extends: base.yaml
 
-camera: picamera2
+camera: webcam              # USB webcam (OpenCV). Use picamera2 only for a ribbon (CSI) camera
+camera_index: 0             # /dev/video0. Check with: v4l2-ctl --list-devices
 alarm: gpio_buzzer
 buzzer_pin: 18
 show_window: false
