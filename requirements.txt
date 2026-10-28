@@ -1,13 +1,20 @@
-# Runtime. Works on:
-#   * laptop (Windows, Python 3.11)                       -> MediaPipe 0.10.21, NumPy 1.26
-#   * Raspberry Pi OS (Legacy, 64-bit) = Bookworm, Py 3.11 -> MediaPipe 0.10.21, NumPy 1.26  <- our Pi OS
-#   * Raspberry Pi OS Trixie / Debian 13 (Python 3.13)    -> MediaPipe 1.1.1,   NumPy 2.x   (fallback)
-# pip picks the right line by itself from the Python version. The code is the same on all
-# of them (src/landmarks.py uses the MediaPipe Tasks API, which both versions have).
-mediapipe==0.10.21; python_version < "3.13"
+# Runtime. Target Pi OS: Raspberry Pi OS (Legacy, 64-bit) = Debian 12 Bookworm, Python 3.11, aarch64.
+#   * laptop (Windows, Python 3.11)               -> MediaPipe 0.10.21, NumPy 1.26
+#   * Raspberry Pi OS Legacy 64-bit (Bookworm)    -> MediaPipe 0.10.18, NumPy 1.26   <- our Pi
+#   * Raspberry Pi OS Trixie (Python 3.13)        -> MediaPipe 1.1.1,   NumPy 2.x    (also works)
+# pip picks the right line by itself. Why 0.10.18 on the Pi: MediaPipe 0.10.20 and newer 0.10.x
+# have NO Linux ARM64 (aarch64) wheel, so "mediapipe==0.10.21" cannot install on a Pi.
+# 0.10.18 is the newest 0.10.x with one; it gives the same landmarks as 0.10.21 (checked on a recording).
+# Every package below (and every dependency) installs on the Pi as a ready-made wheel, nothing compiles.
+# A 32-bit Pi OS will NOT work (no MediaPipe for 32-bit ARM).
+mediapipe==0.10.21; python_version < "3.13" and platform_machine != "aarch64"
+mediapipe==0.10.18; python_version < "3.13" and platform_machine == "aarch64"
 mediapipe==1.1.1; python_version >= "3.13"
 numpy==1.26.4; python_version < "3.13"
 numpy>=2.1,<3; python_version >= "3.13"
+# MediaPipe 0.10.x needs jax; pinned so pip doesn't try newer jax that wants NumPy 2
+jax==0.7.1; python_version < "3.13"
+jaxlib==0.7.1; python_version < "3.13"
 opencv-python==4.11.0.86
 opencv-contrib-python==4.11.0.86   # MediaPipe needs it; pinned to the same version as opencv-python
 PyYAML==6.0.3
@@ -18,7 +25,9 @@ pytest==9.1.1
 
 # Face landmark model: models/face_landmarker.task (in the repository, ~3.7 MB, no download needed)
 
-# Pi only (install with apt, not pip):  python3-gpiozero  python3-lgpio
-#   Trixie also: libportaudio2 (MediaPipe 1.x depends on sounddevice)
+# Pi only (install with apt, not pip):
+#   python3-gpiozero python3-lgpio python3-venv python3-pip   (buzzer on GPIO + venv)
+#   libportaudio2           (MediaPipe imports the 'sounddevice' library, which needs it)
+#   libgl1 libglib2.0-0     (OpenCV needs them; the Lite OS image doesn't have them)
 #   (python3-picamera2 only if you use a ribbon camera instead of the USB webcam)
-# Eye-model training only:              training/requirements-train.txt
+# Eye-model training only:  training/requirements-train.txt

@@ -44,7 +44,7 @@ geometric features** (EAR, MAR, head angles) + **rule-based temporal reasoning**
 | **PyTorch** | ≥ 2.2 (CPU) | Building and training the eye-state CNN |
 | **ONNX** | 1.17.0 (opset 13) | Exporting the trained model to a portable format |
 | **OpenCV** (`cv2`) | 4.11.0.86 | Camera capture, image processing, **running the ONNX model (`cv2.dnn`)**, drawing |
-| **MediaPipe Face Landmarker** (Face Mesh model, Tasks API) | 0.10.21 (laptop and Pi) | Pre-trained face landmark model `face_landmarker.task` (478 points incl. iris) |
+| **MediaPipe Face Landmarker** (Face Mesh model, Tasks API) | 0.10.21 (laptop), 0.10.18 (Pi, ARM64 build; same landmarks) | Pre-trained face landmark model `face_landmarker.task` (478 points incl. iris) |
 | **NumPy** | 1.26.4 | All numeric computation |
 | **PyYAML** | 6.0.3 | Config files (`base.yaml`, `laptop.yaml`, `pi.yaml`) |
 | **pytest** | 9.1.1 | 77 automated unit tests |

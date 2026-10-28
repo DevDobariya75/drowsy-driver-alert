@@ -131,13 +131,14 @@ python tests/run_video_tests.py --lighting       # pass/fail table, 5 lighting v
 Hardware: Raspberry Pi 4 + **USB webcam** + buzzer module. Full step-by-step guide: [`docs/PHASE3.md`](docs/PHASE3.md).
 
 ```bash
-sudo apt install -y python3-gpiozero python3-lgpio python3-venv libportaudio2
+sudo apt install -y python3-gpiozero python3-lgpio python3-venv python3-pip libportaudio2 libgl1 libglib2.0-0
 python3 -m venv --system-site-packages venv && source venv/bin/activate
 pip install -r requirements.txt
 python src/main.py --config config/pi.yaml
 ```
-Target OS: **Raspberry Pi OS (Legacy, 64-bit)**, Debian 12 **Bookworm** (Python 3.11, MediaPipe 0.10.21),
-the same Python and MediaPipe as the laptop. (Trixie / Python 3.13 also works: `requirements.txt` then installs MediaPipe 1.1.1.)
+Target OS: **Raspberry Pi OS (Legacy, 64-bit)**, Debian 12 **Bookworm** (Python 3.11). `requirements.txt` installs
+MediaPipe **0.10.18** there (0.10.21, used on the laptop, has no Raspberry Pi / ARM64 build; both give the same landmarks).
+Must be the **64-bit** OS. (Trixie / Python 3.13 also works: `requirements.txt` then installs MediaPipe 1.1.1.)
 The USB webcam plugs into a USB port and needs no extra setup (`config/pi.yaml`: `camera: webcam`, `camera_index: 0`).
 Buzzer module: S to pin 12 (GPIO18), middle (+) to pin 1 (3.3 V), − to pin 6 (GND).
 If it beeps when it should be silent, set `buzzer_active_high: false` in `pi.yaml`.

@@ -402,14 +402,14 @@ python3 -c "from gpiozero import Buzzer; from time import sleep; b=Buzzer(18); b
 
 ## 3.4 Install the software on the Pi
 ```bash
-sudo apt install -y python3-gpiozero python3-lgpio python3-venv
+sudo apt install -y python3-gpiozero python3-lgpio python3-venv python3-pip libportaudio2 libgl1 libglib2.0-0
 git clone <your-repo-url> ~/IOT_PROJECT        # or copy with scp / WinSCP
 cd ~/IOT_PROJECT
 python3 -m venv --system-site-packages venv    # lets venv use apt's gpiozero
 source venv/bin/activate
 pip install -r requirements.txt                # mediapipe, numpy, pyyaml ...
 ```
-> `requirements.txt` installs MediaPipe 0.10.21 on Python 3.11 (Bookworm Legacy, our Pi OS) and MediaPipe 1.1.1 on Python 3.13 (Trixie, fallback only). `landmarks.py` uses the MediaPipe **Tasks** FaceLandmarker (`models/face_landmarker.task`), which both versions support; the old `mp.solutions.face_mesh` API no longer exists in 1.x.
+> `requirements.txt` installs MediaPipe 0.10.21 on the laptop, 0.10.18 on the Pi with Python 3.11 (Bookworm Legacy, our Pi OS; 0.10.21 has no ARM64 build) and MediaPipe 1.1.1 on Python 3.13 (Trixie, fallback only). `landmarks.py` uses the MediaPipe **Tasks** FaceLandmarker (`models/face_landmarker.task`), which both versions support; the old `mp.solutions.face_mesh` API no longer exists in 1.x.
 > If `mediapipe` fails to install on the Pi, check that you're using the 64-bit OS. As a fallback, use **TFLite Face Mesh** or **dlib 68-landmarks** behind the same `landmarks.py` interface, so no other code changes.
 
 ## 3.5 Run the prototype

@@ -145,7 +145,7 @@ The Pi will start from the **USB pendrive** (no microSD card needed).
 3. **CHOOSE DEVICE** → **Raspberry Pi 4**.
 4. **CHOOSE OS** → **Raspberry Pi OS (other)** → **Raspberry Pi OS (Legacy, 64-bit)**.
    - It is Debian 12 **"Bookworm"** with security updates and the desktop (about 1.3 GB download).
-   - It has **Python 3.11**, the same as the laptop, so the Pi installs the same **MediaPipe 0.10.21** + NumPy 1.26 we tested with.
+   - It has **Python 3.11**, the same as the laptop, so the Pi uses the same NumPy 1.26 and **MediaPipe 0.10.18** (the newest 0.10.x built for the Pi's ARM64 CPU; 0.10.21 on the laptop has no Pi build, and both give the same landmarks).
    - Don't take the top-of-list "Raspberry Pi OS (64-bit)": that is Trixie (Python 3.13). It also works, but it uses a different MediaPipe (1.1.1).
    - **It must be the 64-bit OS** (32-bit has no MediaPipe).
    - (Optional) **Raspberry Pi OS Lite (Legacy, 64-bit)** is the same Bookworm without the desktop: a bit faster, since we control the Pi from the laptop anyway.
@@ -514,7 +514,7 @@ You should see the folders `config docs logs models src tests`, the files `eye_s
 ## 12. Install the software
 
 ```bash
-sudo apt install -y python3-gpiozero python3-lgpio python3-venv python3-pip libportaudio2
+sudo apt install -y python3-gpiozero python3-lgpio python3-venv python3-pip libportaudio2 libgl1 libglib2.0-0
 cd ~/drowsy-driver-alert
 python3 -m venv --system-site-packages venv
 source venv/bin/activate
@@ -526,9 +526,11 @@ What this does, in simple words:
 - `python3-gpiozero` + `python3-lgpio` → control the buzzer pins. These **must come from apt** (not pip).
 - `venv` → a separate box for our Python packages.
 - `--system-site-packages` → lets the box also see the apt packages (gpiozero).
-- `libportaudio2` → a sound library. Bookworm doesn't need it; it is only for MediaPipe 1.x on Trixie. Harmless to install.
+- `libportaudio2` → a sound library. MediaPipe installs the `sounddevice` package, which needs it.
+- `libgl1` + `libglib2.0-0` → libraries OpenCV needs. The desktop OS already has them, the **Lite** OS doesn't (without them: `ImportError: libGL.so.1`).
 - `pip install -r requirements.txt` → installs MediaPipe, OpenCV, NumPy and the rest. Takes **5–15 minutes**.
-  On Bookworm (Python 3.11) it installs MediaPipe 0.10.21 + NumPy 1.26, the same as the laptop.
+  On Bookworm (Python 3.11, 64-bit) it installs MediaPipe 0.10.18 + NumPy 1.26. Everything comes as a ready-made
+  package ("wheel"), nothing has to compile.
 - The webcam needs **nothing extra**: OpenCV talks to it directly.
 
 > **Every time you log in again**, run: `cd ~/drowsy-driver-alert && source venv/bin/activate`.
@@ -545,7 +547,7 @@ python -m pytest -q
 ```
 Expected:
 ```
-mediapipe 0.10.21 | opencv 4.11.0 | numpy 1.26.4     (Trixie instead: mediapipe 1.1.1 | ... | numpy 2.x)
+mediapipe 0.10.18 | opencv 4.11.0 | numpy 1.26.4     (Trixie instead: mediapipe 1.1.1 | ... | numpy 2.x)
 buzzer lib OK
 eye model OK
 face model OK
@@ -816,16 +818,16 @@ pip install -r requirements.txt      # only does something if requirements.txt c
 sudo systemctl restart drowsy
 ```
 
-### 18.1 Pi already set up with Trixie and the OLD code? (mediapipe 0.10.21 error)
+### 18.1 `pip install` failed with "No matching distribution found for mediapipe==0.10.21"?
 
-If you wrote Trixie instead of Bookworm Legacy and `pip install` failed with *"No matching distribution found for mediapipe==0.10.21"*,
-the best fix is to re-write the pendrive with **Raspberry Pi OS (Legacy, 64-bit)** (step 4). If you'd rather not
-re-flash, the new code also works on Trixie / Python 3.13:
+That was the OLD `requirements.txt`: MediaPipe 0.10.21 has no Raspberry Pi (ARM64) build, so it failed on
+**both** Bookworm Legacy and Trixie. The new `requirements.txt` installs 0.10.18 on Bookworm (1.1.1 on Trixie).
+No re-flash needed:
 
 1. On the **laptop**, copy the new files (the two `scp` lines above).
 2. On the **Pi**, make a fresh venv (removes half-installed packages) and install:
    ```bash
-   sudo apt install -y python3-gpiozero python3-lgpio python3-venv libportaudio2
+   sudo apt install -y python3-gpiozero python3-lgpio python3-venv python3-pip libportaudio2 libgl1 libglib2.0-0
    cd ~/drowsy-driver-alert
    find . -name "__pycache__" -type d -exec rm -rf {} +
    rm -rf venv
@@ -834,7 +836,7 @@ re-flash, the new code also works on Trixie / Python 3.13:
    pip install --upgrade pip
    pip install -r requirements.txt
    ```
-3. Do the **✅ Check** of step 12. It must say `mediapipe 1.1.1` and `79 passed`.
+3. Do the **✅ Check** of step 12. It must say `mediapipe 0.10.18` (Bookworm) or `mediapipe 1.1.1` (Trixie), and `79 passed`.
 
 ---
 
@@ -862,9 +864,11 @@ re-flash, the new code also works on Trixie / Python 3.13:
 | Red light off or blinking | Weak power supply | Use the official 5 V 3 A adapter |
 | Pi doesn't start from the pendrive | Old bootloader, or a microSD card is inserted | Remove any microSD card; do step **4.3** |
 | Windows asks to "format the disk" | Windows can't read Linux drives | Click **Cancel**. The pendrive is fine |
-| mediapipe "no matching distribution" for `0.10.21` | Old `requirements.txt` (pinned 0.10.21 for every Python) | Step **18.1** (copy the new files, fresh venv). No re-flash needed |
+| mediapipe "no matching distribution" for `0.10.21` | Old `requirements.txt` (0.10.21 has no Pi build) | Step **18.1** (copy the new files, fresh venv). No re-flash needed |
 | mediapipe "no matching distribution" for any version | 32-bit OS (`uname -m` says `armv7l`) | Write the **64-bit** OS (step 4) |
-| `OSError: PortAudio library not found` | Missing sound library (MediaPipe 1.x) | `sudo apt install -y libportaudio2` |
+| `OSError: PortAudio library not found` | Missing sound library | `sudo apt install -y libportaudio2` |
+| `ImportError: libGL.so.1` (or `libgthread-2.0.so.0`) on `import cv2` | Lite OS lacks OpenCV's libraries | `sudo apt install -y libgl1 libglib2.0-0` |
+| `error: externally-managed-environment` | `pip` ran outside the venv | `source venv/bin/activate` first (prompt shows `(venv)`) |
 | `AttributeError: module 'mediapipe' has no attribute 'solutions'` | Old `src/landmarks.py` | Copy the new `src/` from the laptop |
 | `FileNotFoundError ... face_landmarker.task` | Face model not copied | Copy `models/face_landmarker.task` (step 11) |
 | `ModuleNotFoundError: gpiozero` inside venv | venv made without `--system-site-packages` | `rm -rf venv`, then repeat step 12 |

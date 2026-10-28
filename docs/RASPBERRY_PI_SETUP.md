@@ -60,8 +60,8 @@ says *camera = Pi camera, alarm = GPIO buzzer, no window*.
    - **Device:** choose **Raspberry Pi 4**.
    - **Operating System:** choose **Raspberry Pi OS (Legacy, 64-bit)**: Debian 12 "Bookworm".
 
-   > ⚠️ **Most important choice in this guide.** We use **Python 3.11** and MediaPipe 0.10.21 on the Pi,
-   > exactly like the laptop. Bookworm ships Python 3.11.
+   > ⚠️ **Most important choice in this guide.** We use **Python 3.11** on the Pi, like the laptop,
+   > with MediaPipe 0.10.18 (the Pi build of MediaPipe). Bookworm ships Python 3.11.
    > The main list shows the newer "Trixie" (Python 3.13). Instead go to **Raspberry Pi OS (other)** →
    > **Raspberry Pi OS (Legacy, 64-bit)** ("A port of Debian Bookworm with security updates and desktop environment").
    > Use the full version with desktop or the **Lite** version; both work. Lite is lighter and faster.
@@ -331,7 +331,7 @@ You should see `config  requirements.txt  src  tests ...` and `eye_state.onnx`.
 ## 9. Install the software on the Pi
 
 ```bash
-sudo apt install -y python3-picamera2 python3-gpiozero python3-venv python3-pip
+sudo apt install -y python3-picamera2 python3-gpiozero python3-lgpio python3-venv python3-pip libportaudio2 libgl1 libglib2.0-0
 cd ~/drowsy-driver-alert
 python3 -m venv --system-site-packages venv
 source venv/bin/activate
@@ -351,7 +351,7 @@ python -c "import mediapipe, cv2, numpy, yaml; print('mediapipe', mediapipe.__ve
 python -c "from picamera2 import Picamera2; from gpiozero import Buzzer; print('pi libs OK')"
 python -m pytest -q
 ```
-Expected: `mediapipe 0.10.21 | opencv 4.11.0`, `pi libs OK`, and **77 passed**.
+Expected: `mediapipe 0.10.18 | opencv 4.11.0`, `pi libs OK`, and **79 passed**.
 
 ---
 
@@ -479,7 +479,7 @@ To go back to a ribbon camera, change it to `camera: picamera2` and install `pyt
 | Problem | Fix |
 |---|---|
 | `ssh: Could not resolve hostname` | Wait for the first boot, use the same Wi-Fi, or use the IP address instead (step 4) |
-| `pip install` fails on **mediapipe** (*"no matching distribution"*) | Wrong Python. Check `python3 --version` is 3.11 and `uname -m` is `aarch64`. Re-flash with **Raspberry Pi OS (Legacy, 64-bit)** (step 2) |
+| `pip install` fails on **mediapipe** (*"no matching distribution"*) | If it names `0.10.21`: old `requirements.txt`, copy the new one. Otherwise check `uname -m` is `aarch64` (64-bit); if not, re-flash with **Raspberry Pi OS (Legacy, 64-bit)** (step 2) |
 | `ModuleNotFoundError: picamera2` inside venv | The venv was made without `--system-site-packages`. Delete it (`rm -rf venv`) and repeat step 9 |
 | `rpicam-hello` lists no cameras | Add `camera_auto_detect=0` + `dtoverlay=imx519` to `/boot/firmware/config.txt` (step 6.2). Check the ribbon is in **CAMERA** (not DISPLAY), contacts facing the HDMI ports |
 | Test photo is blurry | Fixed-focus lens: move the camera farther from the face (≥ 50 cm) |
