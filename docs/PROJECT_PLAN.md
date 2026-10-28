@@ -150,14 +150,14 @@ MAR = |upper lip(13) − lower lip(14)| / |left corner(78) − right corner(308)
 ## 2.1 Laptop environment setup
 
 ```bash
-# Python 3.11 recommended (same version as Raspberry Pi OS Bookworm)
+# Python 3.11 recommended (same version as Raspberry Pi OS (Legacy, 64-bit) / Bookworm)
 python -m venv venv
 venv\Scripts\activate            # Windows
 pip install mediapipe opencv-python numpy pyyaml pytest
 pip freeze > requirements.txt
 ```
 
-> Use **Python 3.11** on the laptop. The Pi may use 3.11 (Bookworm) or 3.13 (Trixie); `requirements.txt` picks matching package versions for each, and the code is the same.
+> Use **Python 3.11** on the laptop. The Pi runs **Raspberry Pi OS (Legacy, 64-bit)** (Bookworm), which also has Python 3.11, so both install the same package versions. (Trixie / 3.13 also works; `requirements.txt` handles it.)
 
 ## 2.2 Project structure (hardware-independent design)
 
@@ -353,7 +353,7 @@ Automate this with a script that prints a **pass/fail table**, and re-run it aft
 
 ## 3.1 Prepare the Raspberry Pi (storage + OS)
 1. Insert the microSD card into the laptop. Open **Raspberry Pi Imager**.
-2. Choose **Raspberry Pi OS (64-bit)**: Trixie (Python 3.13) or Bookworm (Python 3.11), both work.
+2. Choose **Raspberry Pi OS (other)** → **Raspberry Pi OS (Legacy, 64-bit)** (Debian 12 Bookworm, Python 3.11, same as the laptop).
 3. In settings (⚙): set the hostname (`drowsy-pi`), **enable SSH**, set the username/password, and Wi-Fi.
 4. Flash, insert the card into the Pi, and power on.
 5. Connect from the laptop: `ssh pi@drowsy-pi.local`
@@ -409,7 +409,7 @@ python3 -m venv --system-site-packages venv    # lets venv use apt's gpiozero
 source venv/bin/activate
 pip install -r requirements.txt                # mediapipe, numpy, pyyaml ...
 ```
-> `requirements.txt` installs MediaPipe 0.10.21 on Python 3.11 (Bookworm) and MediaPipe 1.1.1 on Python 3.13 (Trixie). `landmarks.py` uses the MediaPipe **Tasks** FaceLandmarker (`models/face_landmarker.task`), which both versions support; the old `mp.solutions.face_mesh` API no longer exists in 1.x.
+> `requirements.txt` installs MediaPipe 0.10.21 on Python 3.11 (Bookworm Legacy, our Pi OS) and MediaPipe 1.1.1 on Python 3.13 (Trixie, fallback only). `landmarks.py` uses the MediaPipe **Tasks** FaceLandmarker (`models/face_landmarker.task`), which both versions support; the old `mp.solutions.face_mesh` API no longer exists in 1.x.
 > If `mediapipe` fails to install on the Pi, check that you're using the 64-bit OS. As a fallback, use **TFLite Face Mesh** or **dlib 68-landmarks** behind the same `landmarks.py` interface, so no other code changes.
 
 ## 3.5 Run the prototype

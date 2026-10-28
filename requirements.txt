@@ -1,7 +1,7 @@
 # Runtime. Works on:
 #   * laptop (Windows, Python 3.11)                       -> MediaPipe 0.10.21, NumPy 1.26
-#   * Raspberry Pi OS Bookworm (Python 3.11)              -> MediaPipe 0.10.21, NumPy 1.26
-#   * Raspberry Pi OS Trixie / Debian 13 (Python 3.13)    -> MediaPipe 1.1.1,   NumPy 2.x
+#   * Raspberry Pi OS (Legacy, 64-bit) = Bookworm, Py 3.11 -> MediaPipe 0.10.21, NumPy 1.26  <- our Pi OS
+#   * Raspberry Pi OS Trixie / Debian 13 (Python 3.13)    -> MediaPipe 1.1.1,   NumPy 2.x   (fallback)
 # pip picks the right line by itself from the Python version. The code is the same on all
 # of them (src/landmarks.py uses the MediaPipe Tasks API, which both versions have).
 mediapipe==0.10.21; python_version < "3.13"

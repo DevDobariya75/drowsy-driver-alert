@@ -143,11 +143,12 @@ The Pi will start from the **USB pendrive** (no microSD card needed).
 1. Install and open **Raspberry Pi Imager** on the laptop.
 2. Back up the pendrive, then plug it into the laptop.
 3. **CHOOSE DEVICE** → **Raspberry Pi 4**.
-4. **CHOOSE OS** → **Raspberry Pi OS (64-bit)**. Both versions work:
-   - **Debian 13 "Trixie"** (Python 3.13): the current default. Installs MediaPipe 1.1.1.
-   - **Debian 12 "Bookworm"** (Python 3.11): under *Raspberry Pi OS (other)* → *Legacy, 64-bit*. Installs MediaPipe 0.10.21.
-   - `requirements.txt` picks the right package versions by itself. **It must be the 64-bit OS** (32-bit has no MediaPipe).
-   - **Lite** (no desktop) is best. It is faster, and we control the Pi from the laptop anyway.
+4. **CHOOSE OS** → **Raspberry Pi OS (other)** → **Raspberry Pi OS (Legacy, 64-bit)**.
+   - It is Debian 12 **"Bookworm"** with security updates and the desktop (about 1.3 GB download).
+   - It has **Python 3.11**, the same as the laptop, so the Pi installs the same **MediaPipe 0.10.21** + NumPy 1.26 we tested with.
+   - Don't take the top-of-list "Raspberry Pi OS (64-bit)": that is Trixie (Python 3.13). It also works, but it uses a different MediaPipe (1.1.1).
+   - **It must be the 64-bit OS** (32-bit has no MediaPipe).
+   - (Optional) **Raspberry Pi OS Lite (Legacy, 64-bit)** is the same Bookworm without the desktop: a bit faster, since we control the Pi from the laptop anyway.
 5. **CHOOSE STORAGE** → select the **pendrive** (about 32 GB). Check the size so you don't erase another drive.
 6. **NEXT** → **EDIT SETTINGS**:
    - **General** tab:
@@ -293,9 +294,9 @@ lsblk
 ```
 
 ✅ **Check:**
-- `Python 3.13.x` (Trixie) or `Python 3.11.x` (Bookworm). Both are fine
+- `Python 3.11.x` (Bookworm Legacy). If you see `3.13.x`, you wrote Trixie: it still works, but redo step 4 to match this guide
 - `aarch64` (means 64-bit). **Must be aarch64**: if you see `armv7l`, write the 64-bit OS again (step 4)
-- `VERSION_CODENAME=trixie` or `bookworm`
+- `VERSION_CODENAME=bookworm`
 - `lsblk` shows the pendrive as **`sda`** (~29 G). This means the Pi is running from the pendrive.
 
 ---
@@ -525,9 +526,9 @@ What this does, in simple words:
 - `python3-gpiozero` + `python3-lgpio` → control the buzzer pins. These **must come from apt** (not pip).
 - `venv` → a separate box for our Python packages.
 - `--system-site-packages` → lets the box also see the apt packages (gpiozero).
-- `libportaudio2` → a sound library that MediaPipe 1.x loads (via `sounddevice`). Harmless on Bookworm.
+- `libportaudio2` → a sound library. Bookworm doesn't need it; it is only for MediaPipe 1.x on Trixie. Harmless to install.
 - `pip install -r requirements.txt` → installs MediaPipe, OpenCV, NumPy and the rest. Takes **5–15 minutes**.
-  It picks MediaPipe 1.1.1 + NumPy 2 on Python 3.13 (Trixie) and MediaPipe 0.10.21 + NumPy 1.26 on Python 3.11 (Bookworm).
+  On Bookworm (Python 3.11) it installs MediaPipe 0.10.21 + NumPy 1.26, the same as the laptop.
 - The webcam needs **nothing extra**: OpenCV talks to it directly.
 
 > **Every time you log in again**, run: `cd ~/drowsy-driver-alert && source venv/bin/activate`.
@@ -544,7 +545,7 @@ python -m pytest -q
 ```
 Expected:
 ```
-mediapipe 1.1.1 | opencv 4.11.0 | numpy 2.x          (Bookworm: mediapipe 0.10.21 | ... | numpy 1.26.4)
+mediapipe 0.10.21 | opencv 4.11.0 | numpy 1.26.4     (Trixie instead: mediapipe 1.1.1 | ... | numpy 2.x)
 buzzer lib OK
 eye model OK
 face model OK
@@ -815,10 +816,11 @@ pip install -r requirements.txt      # only does something if requirements.txt c
 sudo systemctl restart drowsy
 ```
 
-### 18.1 Pi already set up with the OLD code? (mediapipe 0.10.21 error on Trixie)
+### 18.1 Pi already set up with Trixie and the OLD code? (mediapipe 0.10.21 error)
 
-If `pip install` failed with *"No matching distribution found for mediapipe==0.10.21"*, you do **not**
-need to re-flash. The new code works on Trixie / Python 3.13:
+If you wrote Trixie instead of Bookworm Legacy and `pip install` failed with *"No matching distribution found for mediapipe==0.10.21"*,
+the best fix is to re-write the pendrive with **Raspberry Pi OS (Legacy, 64-bit)** (step 4). If you'd rather not
+re-flash, the new code also works on Trixie / Python 3.13:
 
 1. On the **laptop**, copy the new files (the two `scp` lines above).
 2. On the **Pi**, make a fresh venv (removes half-installed packages) and install:
@@ -894,12 +896,12 @@ need to re-flash. The new code works on Trixie / Python 3.13:
 ### Checklist
 - [ ] Have: Pi 4, USB webcam, buzzer, 5 V 3 A USB-C supply, 32 GB pendrive, 3 jumper wires, heatsinks
 - [ ] (Optional) Webcam tested on the laptop first
-- [ ] Pendrive written with **Raspberry Pi OS 64-bit** (Trixie or Bookworm; hostname `drowsy-pi`, SSH, Wi-Fi)
+- [ ] Pendrive written with **Raspberry Pi OS (Legacy, 64-bit)** (Bookworm; hostname `drowsy-pi`, SSH, Wi-Fi)
 - [ ] Pi starts from the pendrive (blue port), no microSD card (`lsblk` shows `sda`)
 - [ ] Buzzer: S → pin 12, middle → pin 1, − → pin 6
 - [ ] Webcam in a black USB port; `ls /dev/video*` shows `/dev/video0`
 - [ ] `ssh pi@drowsy-pi.local` works
-- [ ] `python3 --version` → 3.13 or 3.11, `uname -m` → aarch64
+- [ ] `python3 --version` → 3.11, `uname -m` → aarch64
 - [ ] Test photo (`fswebcam`) is sharp and the right way up
 - [ ] Buzzer type found (active / active-LOW / passive) and setting done
 - [ ] Project copied; `config/pi.yaml` has `camera: webcam`

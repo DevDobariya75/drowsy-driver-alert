@@ -5,9 +5,9 @@ The matching 3D points (x, y, depth z, all in pixels) are kept in `last_3d` for 
 Uses the MediaPipe Tasks API (FaceLandmarker + models/face_landmarker.task). It gives
 the same 478-point mesh as the old `mp.solutions.face_mesh` (with refine_landmarks=True),
 so every landmark index in the project is unchanged. The old API was removed from
-MediaPipe 1.x, which is the only version that installs on Python 3.13 (Raspberry Pi OS
-Trixie). The Tasks API exists in both 0.10.x and 1.x, so the laptop and the Pi run
-identical code."""
+MediaPipe 1.x (the only version for Python 3.13, e.g. Raspberry Pi OS Trixie). The Pi runs
+Raspberry Pi OS (Legacy, 64-bit) = Bookworm, Python 3.11, MediaPipe 0.10.21 like the laptop;
+the Tasks API exists in both 0.10.x and 1.x, so the code works either way."""
 import time
 from pathlib import Path
 

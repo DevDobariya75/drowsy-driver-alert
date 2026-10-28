@@ -40,11 +40,11 @@ geometric features** (EAR, MAR, head angles) + **rule-based temporal reasoning**
 
 | Tool | Version | What we used it for |
 |---|---|---|
-| **Python** | 3.11 (laptop) / 3.13 (Pi, Trixie) | Whole project, same code on both |
+| **Python** | 3.11 (laptop and Pi: Raspberry Pi OS Legacy 64-bit, Bookworm) | Whole project, same code on both |
 | **PyTorch** | ≥ 2.2 (CPU) | Building and training the eye-state CNN |
 | **ONNX** | 1.17.0 (opset 13) | Exporting the trained model to a portable format |
 | **OpenCV** (`cv2`) | 4.11.0.86 | Camera capture, image processing, **running the ONNX model (`cv2.dnn`)**, drawing |
-| **MediaPipe Face Landmarker** (Face Mesh model, Tasks API) | 0.10.21 (laptop) / 1.1.1 (Pi, Python 3.13) | Pre-trained face landmark model `face_landmarker.task` (478 points incl. iris) |
+| **MediaPipe Face Landmarker** (Face Mesh model, Tasks API) | 0.10.21 (laptop and Pi) | Pre-trained face landmark model `face_landmarker.task` (478 points incl. iris) |
 | **NumPy** | 1.26.4 | All numeric computation |
 | **PyYAML** | 6.0.3 | Config files (`base.yaml`, `laptop.yaml`, `pi.yaml`) |
 | **pytest** | 9.1.1 | 77 automated unit tests |
@@ -399,7 +399,7 @@ Rules, using the ML outputs. For example: eyes closed ≥ 1 s → MICROSLEEP (cr
 Fine-tune on our own camera images, INT8 quantization, IR night vision, larger real-world testing, and possibly a temporal (LSTM) model.
 
 **Q29. What is MediaPipe Face Mesh?**
-It is Google's pre-trained lightweight model that finds a face and predicts 468 face landmarks + 10 iris landmarks (478) in 3D, in real time on a CPU. We use it as a feature extractor, through the MediaPipe Tasks `FaceLandmarker` API in VIDEO mode (it tracks the face between frames). We moved from the older `mp.solutions.face_mesh` API because MediaPipe 1.x, the only version for Python 3.13 on the Pi, removed it; the landmarks are the same 478 points (about 2 px apart on our test clip).
+It is Google's pre-trained lightweight model that finds a face and predicts 468 face landmarks + 10 iris landmarks (478) in 3D, in real time on a CPU. We use it as a feature extractor, through the MediaPipe Tasks `FaceLandmarker` API in VIDEO mode (it tracks the face between frames). We moved from the older `mp.solutions.face_mesh` API because MediaPipe 1.x (the only version for Python 3.13, e.g. Raspberry Pi OS Trixie) removed it, and the Tasks API keeps the code working on both; the landmarks are the same 478 points (about 2 px apart on our test clip).
 
 **Q30. Why grayscale 48×48?**
 Eye open/closed doesn't depend on colour, the dataset is grayscale, and small inputs make the model fast.

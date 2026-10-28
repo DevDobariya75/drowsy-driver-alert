@@ -4,8 +4,9 @@
 > The project now uses a **USB webcam** and boots from a **USB pendrive**.
 > **Follow [`PHASE3.md`](PHASE3.md) instead.** With a USB webcam, skip every Arducam / `rpicam` /
 > `dtoverlay` / ribbon step below, and you don't need `python3-picamera2`. `config/pi.yaml` already says `camera: webcam`.
-> Its warnings that **Trixie / Python 3.13 will not work are out of date**: the project now runs on both
-> Trixie (MediaPipe 1.1.1) and Bookworm (MediaPipe 0.10.21). Expected test count is now **79 passed**.
+> OS: use **Raspberry Pi OS (Legacy, 64-bit)** (Debian 12 Bookworm, Python 3.11), as below.
+> (Its warnings that Trixie will not work are out of date, Trixie now works too, but we use Bookworm Legacy.)
+> Expected test count is now **79 passed**.
 
 This guide assumes you have **never used a Raspberry Pi**. Follow the steps in order. Each step
 ends with a **check** so you know it worked before moving on.
@@ -38,7 +39,7 @@ Wi-Fi with **SSH** (a remote terminal). The laptop and the Pi must be on the **s
 
 ```
 ┌───────── Laptop (Windows) ─────────┐           ┌──────────── Raspberry Pi ────────────┐
-│ 1. Flash OS onto microSD card       │           │ OS: Raspberry Pi OS (64-bit) Bookworm│
+│ 1. Flash OS onto microSD card       │           │ OS: RPi OS (Legacy, 64-bit) Bookworm │
 │ 2. Copy project files ──────────────┼── Wi-Fi ─▶│ ~/drowsy-driver-alert/               │
 │ 3. Control the Pi with SSH          │           │   src/  config/  models/  ...        │
 └─────────────────────────────────────┘           │ Camera (ribbon) ── CSI port          │
@@ -57,13 +58,12 @@ says *camera = Pi camera, alarm = GPIO buzzer, no window*.
 2. Put the microSD card in the card reader and plug it into the laptop.
 3. Open Raspberry Pi Imager:
    - **Device:** choose **Raspberry Pi 4**.
-   - **Operating System:** choose **Raspberry Pi OS (64-bit) based on Debian 12 "Bookworm"**.
+   - **Operating System:** choose **Raspberry Pi OS (Legacy, 64-bit)**: Debian 12 "Bookworm".
 
-   > ⚠️ **Most important choice in this guide.** Our project needs **Python 3.11**, because
-   > MediaPipe 0.10.21 does not support Python 3.13. Bookworm ships Python 3.11.
-   > The newer "Trixie" release ships Python 3.13, **and MediaPipe will not install on it.**
-   > If the main list shows only Trixie, go to **Raspberry Pi OS (other)** →
-   > **Raspberry Pi OS (Legacy, 64-bit)**, which is Bookworm.
+   > ⚠️ **Most important choice in this guide.** We use **Python 3.11** and MediaPipe 0.10.21 on the Pi,
+   > exactly like the laptop. Bookworm ships Python 3.11.
+   > The main list shows the newer "Trixie" (Python 3.13). Instead go to **Raspberry Pi OS (other)** →
+   > **Raspberry Pi OS (Legacy, 64-bit)** ("A port of Debian Bookworm with security updates and desktop environment").
    > Use the full version with desktop or the **Lite** version; both work. Lite is lighter and faster.
 
    - **Storage:** choose your microSD card (double-check it's the card, not another drive!).
@@ -188,7 +188,7 @@ python3 --version
 uname -m
 ```
 ✅ **Check:** `Python 3.11.x` and `aarch64` (64-bit). If you see Python 3.13, you flashed
-Trixie. Go back to step 2 and choose **Bookworm (Legacy, 64-bit)**.
+Trixie. Go back to step 2 and choose **Raspberry Pi OS (Legacy, 64-bit)**.
 
 ---
 
@@ -479,7 +479,7 @@ To go back to a ribbon camera, change it to `camera: picamera2` and install `pyt
 | Problem | Fix |
 |---|---|
 | `ssh: Could not resolve hostname` | Wait for the first boot, use the same Wi-Fi, or use the IP address instead (step 4) |
-| `pip install` fails on **mediapipe** (*"no matching distribution"*) | Wrong Python. Check `python3 --version` is 3.11 and `uname -m` is `aarch64`. Re-flash with **Bookworm 64-bit** (step 2) |
+| `pip install` fails on **mediapipe** (*"no matching distribution"*) | Wrong Python. Check `python3 --version` is 3.11 and `uname -m` is `aarch64`. Re-flash with **Raspberry Pi OS (Legacy, 64-bit)** (step 2) |
 | `ModuleNotFoundError: picamera2` inside venv | The venv was made without `--system-site-packages`. Delete it (`rm -rf venv`) and repeat step 9 |
 | `rpicam-hello` lists no cameras | Add `camera_auto_detect=0` + `dtoverlay=imx519` to `/boot/firmware/config.txt` (step 6.2). Check the ribbon is in **CAMERA** (not DISPLAY), contacts facing the HDMI ports |
 | Test photo is blurry | Fixed-focus lens: move the camera farther from the face (≥ 50 cm) |
@@ -496,7 +496,7 @@ To go back to a ribbon camera, change it to `camera: picamera2` and install `pyt
 
 ## 16. Phase 3 checklist
 
-- [ ] microSD flashed with **Raspberry Pi OS 64-bit Bookworm** (SSH + Wi-Fi set)
+- [ ] microSD flashed with **Raspberry Pi OS (Legacy, 64-bit)** (Bookworm) (SSH + Wi-Fi set)
 - [ ] SSH works: `ssh pi@drowsy-pi.local`
 - [ ] `python3 --version` → 3.11
 - [ ] Arducam on the **CAMERA** connector; `dtoverlay=imx519` added if needed
